@@ -1,0 +1,3226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MacroTrack - Indian & South Indian Nutrition Tracker</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+          },
+          colors: {
+            spice: {
+              50: '#fff7ed',
+              100: '#ffedd5',
+              200: '#fed7aa',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c',
+            },
+            leaf: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              800: '#065f46',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Custom scrollbars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .modal-open {
+      overflow: hidden;
+    }
+    .smooth-bar {
+      transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes wavePulse {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+    .wave-anim {
+      animation: wavePulse 3s ease-in-out infinite;
+    }
+    .water-fill-height {
+      transition: height 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+  </style>
+</head>
+<body class="bg-stone-50 text-stone-800 antialiased min-h-screen flex flex-col font-sans selection:bg-leaf-100 selection:text-leaf-800">
+
+  <!-- ==================== HEADER ==================== -->
+  <header class="bg-white border-b border-stone-200 sticky top-0 z-40 shadow-xs backdrop-blur-md bg-white/95">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-16 sm:h-20">
+        <!-- Logo & Title -->
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-br from-leaf-600 via-leaf-700 to-amber-600 flex items-center justify-center text-white shadow-md shadow-leaf-700/20">
+            <span class="text-xl">🌿</span>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-stone-900 leading-none">AaharTrack</h1>
+              <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-spice-100 text-spice-700 border border-spice-200">South Indian & Desi</span>
+            </div>
+            <p class="text-xs text-stone-500 font-medium hidden sm:block">Accurate Calories & Macros for Tiffins, Pappu, Rice, Sprouts & Snacks</p>
+          </div>
+        </div>
+
+        <!-- Date Controls & Action Buttons -->
+        <div class="flex items-center space-x-2 sm:space-x-3">
+          <!-- Quick Day Switcher -->
+          <div class="hidden md:flex items-center bg-stone-100 p-1 rounded-xl text-xs font-semibold">
+            <button id="quickYesterdayBtn" class="px-2.5 py-1 rounded-lg text-stone-600 hover:text-stone-900 hover:bg-white transition">Yesterday</button>
+            <button id="quickTodayBtn" class="px-2.5 py-1 rounded-lg bg-white text-leaf-700 shadow-2xs font-bold transition">Today</button>
+          </div>
+
+          <!-- Date Selector -->
+          <div class="flex items-center bg-stone-100 rounded-xl p-1 border border-stone-200/80">
+            <button id="prevDateBtn" title="Previous Day" class="p-1.5 rounded-lg text-stone-600 hover:text-stone-900 hover:bg-white transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </button>
+            <input type="date" id="currentDateInput" class="bg-transparent text-xs sm:text-sm font-semibold text-stone-800 px-1.5 sm:px-2 py-0.5 border-none focus:outline-none cursor-pointer" />
+            <button id="nextDateBtn" title="Next Day" class="p-1.5 rounded-lg text-stone-600 hover:text-stone-900 hover:bg-white transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+
+          <!-- Target Goals Modal Trigger -->
+          <button id="openGoalsModalBtn" class="flex items-center space-x-1 px-3 py-2 text-xs sm:text-sm font-semibold text-stone-700 bg-white border border-stone-200 hover:bg-stone-50 hover:border-stone-300 rounded-xl transition shadow-2xs">
+            <svg class="w-4 h-4 text-leaf-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <span class="hidden sm:inline">Set</span> Goals
+          </button>
+          <div class="flex items-center gap-1.5">
+            <button type="button" id="exportBackupBtn" title="Download a backup of your tracker data" class="px-2.5 py-2 text-xs font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl transition">Export</button>
+            <button type="button" id="importBackupBtn" title="Restore tracker data from a backup file" class="px-2.5 py-2 text-xs font-bold text-stone-700 bg-stone-100 hover:bg-stone-200 border border-stone-200 rounded-xl transition">Import</button>
+            <input type="file" id="importBackupFile" accept="application/json,.json" class="hidden" />
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== MAIN CONTENT CONTAINER ==================== -->
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-5 space-y-6">
+
+    <!-- DAILY NUTRITION DASHBOARD -->
+    <section class="grid grid-cols-1 md:grid-cols-12 gap-4">
+      <!-- Calories Summary Card -->
+      <div class="md:col-span-5 bg-white rounded-3xl p-5 sm:p-6 border border-stone-200/90 shadow-xs flex flex-col justify-between relative overflow-hidden">
+        <div class="flex items-center justify-between pb-3 border-b border-stone-100">
+          <div>
+            <span class="text-[11px] font-bold tracking-wider uppercase text-stone-400">Energy Summary</span>
+            <h2 class="text-lg font-extrabold text-stone-900" id="formattedDateHeader">Today's Nutrition</h2>
+          </div>
+          <span id="calorieStatusBadge" class="text-xs px-3 py-1 rounded-full font-bold bg-leaf-50 text-leaf-700 border border-leaf-200">
+            Within Target
+          </span>
+        </div>
+
+        <div class="py-5 flex items-end justify-between">
+          <div>
+            <div class="text-4xl sm:text-5xl font-black text-stone-900 tracking-tight" id="totalCaloriesDisplay">0</div>
+            <div class="text-xs text-stone-500 font-medium mt-1">Consumed of <span id="targetCaloriesDisplay" class="font-bold text-stone-800">2000</span> kcal target</div>
+          </div>
+          <div class="text-right">
+            <div class="text-2xl sm:text-3xl font-extrabold" id="remainingCaloriesDisplay">2000</div>
+            <div class="text-xs font-semibold text-stone-400" id="remainingCaloriesLabel">kcal remaining</div>
+          </div>
+        </div>
+
+        <!-- Linear Progress Indicator -->
+        <div>
+          <div class="flex justify-between text-xs font-bold mb-1.5 text-stone-500">
+            <span>Daily Intake Goal</span>
+            <span id="caloriePercentDisplay" class="text-stone-800">0%</span>
+          </div>
+          <div class="w-full bg-stone-100 h-3 rounded-full overflow-hidden p-0.5 border border-stone-200">
+            <div id="calorieProgressBar" class="bg-gradient-to-r from-leaf-500 to-emerald-600 h-full rounded-full smooth-bar" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Macros: Protein, Carbs, Fat & Fiber Cards -->
+      <div class="md:col-span-7 grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <!-- Protein Card -->
+        <div class="bg-white rounded-2xl p-4 border border-stone-200/80 shadow-xs flex flex-col justify-between hover:border-rose-200 transition">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-rose-700 bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-100">Protein</span>
+            <span class="text-[10px] text-stone-400 font-medium">Muscle</span>
+          </div>
+          <div class="my-3">
+            <div class="text-2xl font-black text-stone-900"><span id="proteinConsumed">0</span><span class="text-xs font-semibold text-stone-400 ml-0.5">g</span></div>
+            <div class="text-[11px] text-stone-500 mt-0.5 font-medium">Goal: <span id="proteinTarget" class="font-bold text-stone-700">120</span>g</div>
+          </div>
+          <div>
+            <div class="w-full bg-stone-100 h-2 rounded-full overflow-hidden">
+              <div id="proteinBar" class="bg-rose-500 h-full rounded-full smooth-bar" style="width: 0%"></div>
+            </div>
+            <div class="text-[10px] text-right text-stone-500 mt-1 font-bold" id="proteinPercent">0%</div>
+          </div>
+        </div>
+
+        <!-- Carbs Card -->
+        <div class="bg-white rounded-2xl p-4 border border-stone-200/80 shadow-xs flex flex-col justify-between hover:border-amber-200 transition">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-100">Carbs</span>
+            <span class="text-[10px] text-stone-400 font-medium">Energy</span>
+          </div>
+          <div class="my-3">
+            <div class="text-2xl font-black text-stone-900"><span id="carbsConsumed">0</span><span class="text-xs font-semibold text-stone-400 ml-0.5">g</span></div>
+            <div class="text-[11px] text-stone-500 mt-0.5 font-medium">Goal: <span id="carbsTarget" class="font-bold text-stone-700">220</span>g</div>
+          </div>
+          <div>
+            <div class="w-full bg-stone-100 h-2 rounded-full overflow-hidden">
+              <div id="carbsBar" class="bg-amber-500 h-full rounded-full smooth-bar" style="width: 0%"></div>
+            </div>
+            <div class="text-[10px] text-right text-stone-500 mt-1 font-bold" id="carbsPercent">0%</div>
+          </div>
+        </div>
+
+        <!-- Fat Card -->
+        <div class="bg-white rounded-2xl p-4 border border-stone-200/80 shadow-xs flex flex-col justify-between hover:border-indigo-200 transition">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100">Fat</span>
+            <span class="text-[10px] text-stone-400 font-medium">Hormones</span>
+          </div>
+          <div class="my-3">
+            <div class="text-2xl font-black text-stone-900"><span id="fatConsumed">0</span><span class="text-xs font-semibold text-stone-400 ml-0.5">g</span></div>
+            <div class="text-[11px] text-stone-500 mt-0.5 font-medium">Goal: <span id="fatTarget" class="font-bold text-stone-700">60</span>g</div>
+          </div>
+          <div>
+            <div class="w-full bg-stone-100 h-2 rounded-full overflow-hidden">
+              <div id="fatBar" class="bg-indigo-500 h-full rounded-full smooth-bar" style="width: 0%"></div>
+            </div>
+            <div class="text-[10px] text-right text-stone-500 mt-1 font-bold" id="fatPercent">0%</div>
+          </div>
+        </div>
+
+        <!-- Fiber Card -->
+        <div class="bg-white rounded-2xl p-4 border border-stone-200/80 shadow-xs flex flex-col justify-between hover:border-leaf-200 transition">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-leaf-700 bg-leaf-50 px-2 py-0.5 rounded-lg border border-leaf-100">Fiber</span>
+            <span class="text-[10px] text-stone-400 font-medium">Digestion</span>
+          </div>
+          <div class="my-3">
+            <div class="text-2xl font-black text-stone-900"><span id="fiberConsumed">0</span><span class="text-xs font-semibold text-stone-400 ml-0.5">g</span></div>
+            <div class="text-[11px] text-stone-500 mt-0.5 font-medium">Goal: <span id="fiberTarget" class="font-bold text-stone-700">30</span>g</div>
+          </div>
+          <div>
+            <div class="w-full bg-stone-100 h-2 rounded-full overflow-hidden">
+              <div id="fiberBar" class="bg-leaf-600 h-full rounded-full smooth-bar" style="width: 0%"></div>
+            </div>
+            <div class="text-[10px] text-right text-stone-500 mt-1 font-bold" id="fiberPercent">0%</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== DAILY WATER & HYDRATION TRACKER ==================== -->
+    <section class="bg-white rounded-3xl border border-stone-200/90 shadow-sm p-5 sm:p-7 relative overflow-hidden">
+      <!-- Background subtle water ripple decoration -->
+      <div class="absolute -top-16 -right-16 w-56 h-56 bg-sky-50 rounded-full blur-2xl pointer-events-none -z-0"></div>
+
+      <div class="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4 pb-5 border-b border-stone-100">
+        <div class="flex items-center space-x-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white shadow-md shadow-blue-500/25">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+          </div>
+          <div>
+            <div class="flex items-center space-x-2">
+              <h2 class="text-lg font-extrabold text-stone-900 tracking-tight">Hydration & Water Tracker</h2>
+              <span class="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-700 border border-cyan-200">Neeru / Vellam</span>
+            </div>
+            <p class="text-xs text-stone-500 font-medium mt-0.5">Track your daily water intake • South Indian steel tumbler ~250 ml</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2.5">
+          <span id="waterStatusBadge" class="text-xs px-3 py-1 rounded-full font-bold bg-cyan-50 text-cyan-800 border border-cyan-200 flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-cyan-500 animate-pulse"></span>
+            <span id="waterStatusText">0% Completed</span>
+          </span>
+          <!-- Direct Quick Target Customization Button -->
+          <button 
+            type="button" 
+            id="openWaterTargetModalBtn" 
+            title="Customize daily water target" 
+            class="px-2.5 py-1 text-xs font-bold text-cyan-800 bg-cyan-100/80 hover:bg-cyan-200 border border-cyan-300 rounded-xl transition flex items-center gap-1 shadow-2xs"
+          >
+            <svg class="w-3.5 h-3.5 text-cyan-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+            <span>Target: <strong id="cardWaterTargetDisplay">3000</strong> ml</span>
+          </button>
+          <button 
+            type="button" 
+            id="undoWaterBtn" 
+            title="Undo last 250 ml" 
+            class="px-2.5 py-1 text-xs font-semibold text-stone-500 bg-stone-100 hover:bg-stone-200 rounded-xl transition flex items-center gap-1"
+          >
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+            <span>-250ml</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Water Tracker Body: Visual Tumbler + Stats + Glass Grid + Quick Add Buttons -->
+      <div class="relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-5 pt-5 items-center">
+        
+        <!-- Left: Animated Water Level Display Card -->
+        <div class="lg:col-span-4 bg-gradient-to-b from-sky-50/70 to-blue-50/50 rounded-2xl p-4 sm:p-5 border border-sky-100 flex items-center space-x-4">
+          <!-- Stylized Tumbler with dynamic water fill -->
+          <div class="w-16 h-28 sm:w-20 sm:h-32 bg-white rounded-2xl border-2 border-sky-300 p-1 relative flex flex-col justify-end overflow-hidden shadow-inner flex-shrink-0">
+            <!-- Dynamic Water Fill Level -->
+            <div id="waterLevelFill" class="w-full bg-gradient-to-t from-blue-500 via-cyan-400 to-sky-300 rounded-xl water-fill-height relative overflow-hidden" style="height: 0%;">
+              <div class="absolute inset-0 bg-white/20 wave-anim"></div>
+            </div>
+            <!-- Glass measurement markings -->
+            <div class="absolute inset-y-2 left-1.5 flex flex-col justify-between text-[8px] font-bold text-sky-400/80 pointer-events-none select-none">
+              <span>100%</span>
+              <span>75%</span>
+              <span>50%</span>
+              <span>25%</span>
+            </div>
+          </div>
+
+          <!-- Quantitative Details -->
+          <div class="space-y-1.5 flex-grow">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-sky-700">Consumed Today</div>
+            <div class="text-3xl font-black text-stone-900 tracking-tight">
+              <span id="currentWaterDisplay">0</span> <span class="text-sm font-semibold text-stone-400">/ <span id="targetWaterDisplay">3000</span> ml</span>
+            </div>
+            <div class="text-xs font-semibold text-stone-600 flex items-center gap-1">
+              <span id="waterRemainingText">3000 ml left</span>
+              <span class="text-stone-300">•</span>
+              <span id="waterGlassesCount" class="font-bold text-cyan-700">0 / 12 glasses</span>
+            </div>
+            <!-- Progress Bar -->
+            <div class="w-full bg-white h-2 rounded-full overflow-hidden border border-sky-200 mt-2">
+              <div id="waterProgressBar" class="bg-gradient-to-r from-cyan-400 to-blue-600 h-full rounded-full smooth-bar" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Glass Matrix & Quick Action Buttons -->
+        <div class="lg:col-span-8 space-y-4">
+          <!-- Interactive Glass Icons Grid (Dynamic count based on user target) -->
+          <div>
+            <div class="flex items-center justify-between text-xs font-bold text-stone-500 mb-2">
+              <span>Tap a tumbler to log or remove water (250 ml each):</span>
+              <span class="text-[11px] text-cyan-600 font-semibold" id="glassesLegend">1 glass = 250 ml</span>
+            </div>
+            <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 xl:grid-cols-12 gap-1.5 sm:gap-2" id="glassIconsGrid">
+              <!-- Dynamically populated glasses based on custom target -->
+            </div>
+          </div>
+
+          <!-- Quick Add Preset Buttons & Custom ml logger -->
+          <div class="flex flex-wrap items-center gap-2 pt-1">
+            <button 
+              type="button" 
+              onclick="logWaterIntake(250)" 
+              class="px-3 py-2 bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition active:scale-95 shadow-2xs"
+            >
+              <span>🥛</span>
+              <span>+250 ml</span>
+              <span class="text-[10px] text-sky-600 font-normal hidden sm:inline">(Tumbler)</span>
+            </button>
+
+            <button 
+              type="button" 
+              onclick="logWaterIntake(350)" 
+              class="px-3 py-2 bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition active:scale-95 shadow-2xs"
+            >
+              <span>🫖</span>
+              <span>+350 ml</span>
+              <span class="text-[10px] text-sky-600 font-normal hidden sm:inline">(Mug)</span>
+            </button>
+
+            <button 
+              type="button" 
+              onclick="logWaterIntake(500)" 
+              class="px-3 py-2 bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition active:scale-95 shadow-2xs"
+            >
+              <span>💧</span>
+              <span>+500 ml</span>
+              <span class="text-[10px] text-sky-600 font-normal hidden sm:inline">(Bottle)</span>
+            </button>
+
+            <button 
+              type="button" 
+              onclick="logWaterIntake(1000)" 
+              class="px-3 py-2 bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition active:scale-95 shadow-2xs"
+            >
+              <span>🍶</span>
+              <span>+1000 ml</span>
+              <span class="text-[10px] text-sky-600 font-normal hidden sm:inline">(Flask)</span>
+            </button>
+
+            <!-- Custom Milliliters Input -->
+            <div class="flex items-center space-x-1.5 ml-auto">
+              <div class="relative w-24">
+                <input 
+                  type="number" 
+                  id="customWaterInput" 
+                  min="20" 
+                  max="2000" 
+                  step="50" 
+                  placeholder="Custom" 
+                  class="w-full px-2.5 py-1.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-bold text-right pr-7 focus:ring-2 focus:ring-cyan-500 outline-none"
+                />
+                <span class="absolute right-2 top-1.5 text-[10px] font-bold text-stone-400">ml</span>
+              </div>
+              <button 
+                type="button" 
+                id="addCustomWaterBtn" 
+                class="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white rounded-xl text-xs font-bold transition active:scale-95 shadow-2xs"
+              >
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==================== LOG FOOD INTAKE CONTROLLER ==================== -->
+    <section class="bg-white rounded-3xl border border-stone-200/90 shadow-sm p-5 sm:p-7 space-y-5">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-stone-100">
+        <div>
+          <h2 class="text-lg font-extrabold text-stone-900 flex items-center gap-2">
+            <span>🥘</span> Log Food Intake
+          </h2>
+          <p class="text-xs text-stone-500 mt-0.5">Pick from South Indian staples, curries, tiffins, or enter custom weight & servings.</p>
+        </div>
+        <button id="openNewFoodModalBtn" class="self-start sm:self-auto inline-flex items-center space-x-1.5 px-3.5 py-1.5 text-xs font-bold text-leaf-700 bg-leaf-50 hover:bg-leaf-100 border border-leaf-200 rounded-xl transition shadow-2xs">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+          <span>Create Custom Food</span>
+        </button>
+      </div>
+
+      <form id="addFoodForm" class="space-y-4">
+        <!-- Meal Selection (Breakfast, Lunch, Evening Snacks, Dinner) -->
+        <div>
+          <label class="block text-xs font-bold uppercase tracking-wider text-stone-400 mb-2">Select Meal</label>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-2" id="mealTypeContainer">
+            <label class="flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl border border-leaf-600 bg-leaf-50/70 text-leaf-800 cursor-pointer font-bold text-xs sm:text-sm shadow-2xs transition">
+              <input type="radio" name="mealType" value="Breakfast" checked class="hidden meal-radio">
+              <span>🌅 Breakfast</span>
+            </label>
+            <label class="flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl border border-stone-200 bg-stone-50/50 hover:bg-stone-100 text-stone-700 cursor-pointer font-semibold text-xs sm:text-sm transition">
+              <input type="radio" name="mealType" value="Lunch" class="hidden meal-radio">
+              <span>☀️ Lunch</span>
+            </label>
+            <label class="flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl border border-stone-200 bg-stone-50/50 hover:bg-stone-100 text-stone-700 cursor-pointer font-semibold text-xs sm:text-sm transition">
+              <input type="radio" name="mealType" value="Evening Snacks" class="hidden meal-radio">
+              <span>☕ Evening Snacks</span>
+            </label>
+            <label class="flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl border border-stone-200 bg-stone-50/50 hover:bg-stone-100 text-stone-700 cursor-pointer font-semibold text-xs sm:text-sm transition">
+              <input type="radio" name="mealType" value="Dinner" class="hidden meal-radio">
+              <span>🌙 Dinner</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Category Filter Pills for Quick Search Filtering -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-bold uppercase tracking-wider text-stone-400">Diet Category Filter</label>
+            <span class="text-[11px] text-stone-400" id="dbItemsCountBadge">75+ Indian items</span>
+          </div>
+          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs" id="categoryPillContainer">
+            <button type="button" class="category-pill whitespace-nowrap px-3 py-1.5 rounded-xl font-bold bg-stone-900 text-white transition shadow-2xs" data-category="ALL">All Foods</button>
+            <button type="button" class="category-pill whitespace-nowrap px-3 py-1.5 rounded-xl font-semibold bg-stone-100 text-stone-600 hover:bg-stone-200 transition" data-category="tiffins_staples">🥞 Tiffins & Staples</button>
+            <button type="button" class="category-pill whitespace-nowrap px-3 py-1.5 rounded-xl font-semibold bg-stone-100 text-stone-600 hover:bg-stone-200 transition" data-category="curries_dals">🍲 Curries, Dals & Rasam</button>
+            <button type="button" class="category-pill whitespace-nowrap px-3 py-1.5 rounded-xl font-semibold bg-stone-100 text-stone-600 hover:bg-stone-200 transition" data-category="sprouts_legumes">🌱 Sprouts & Protein</button>
+            <button type="button" class="category-pill whitespace-nowrap px-3 py-1.5 rounded-xl font-semibold bg-stone-100 text-stone-600 hover:bg-stone-200 transition" data-category="snacks">🥟 Homemade Snacks</button>
+            <button type="button" class="category-pill whitespace-nowrap px-3 py-1.5 rounded-xl font-semibold bg-stone-100 text-stone-600 hover:bg-stone-200 transition" data-category="fruits_veg">🥭 Fruits & Vegetables</button>
+            <button type="button" class="category-pill whitespace-nowrap px-3 py-1.5 rounded-xl font-semibold bg-stone-100 text-stone-600 hover:bg-stone-200 transition" data-category="dairy_chutneys">🥥 Dairy, Chutneys & Drinks</button>
+          </div>
+        </div>
+
+        <!-- Food Search Input + Weight / Serving Selector -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-3 sm:gap-4 items-start">
+          <!-- Food Search with Instant Dropdown -->
+          <div class="md:col-span-7 relative">
+            <label for="foodSearchInput" class="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-1">Search Food Item</label>
+            <div class="relative">
+              <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-stone-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              </div>
+              <input
+                type="text"
+                id="foodSearchInput"
+                placeholder="Try: Idli, Sambar, Pesarattu, Moong sprouts, Curd rice..."
+                autocomplete="off"
+                class="w-full pl-10 pr-10 py-3 bg-stone-50 border border-stone-300 rounded-2xl text-sm font-medium focus:ring-2 focus:ring-leaf-500 focus:border-leaf-500 focus:bg-white outline-none transition"
+              />
+              <button type="button" id="clearSearchBtn" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-stone-400 hover:text-stone-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <!-- Autocomplete suggestions dropdown -->
+            <div id="foodSuggestions" class="hidden absolute z-50 left-0 right-0 mt-1.5 bg-white border border-stone-200 rounded-2xl shadow-2xl max-h-72 overflow-y-auto divide-y divide-stone-100">
+              <!-- Dynamically rendered -->
+            </div>
+          </div>
+
+          <!-- Weight Input & Action Button -->
+          <div class="md:col-span-5">
+            <label for="foodWeightInput" class="block text-xs font-bold uppercase tracking-wider text-stone-500 mb-1">Quantity (Grams / ml)</label>
+            <div class="flex items-center space-x-2">
+              <div class="relative flex-grow">
+                <input
+                  type="number"
+                  id="foodWeightInput"
+                  min="1"
+                  max="5000"
+                  step="1"
+                  value="100"
+                  placeholder="Grams"
+                  class="w-full px-3.5 py-3 bg-stone-50 border border-stone-300 rounded-2xl text-sm font-bold text-right pr-9 focus:ring-2 focus:ring-leaf-500 focus:border-leaf-500 focus:bg-white outline-none transition"
+                />
+                <span class="absolute right-3.5 top-3 text-xs font-bold text-stone-400">g</span>
+              </div>
+              <button
+                type="submit"
+                id="submitLogBtn"
+                class="flex-shrink-0 inline-flex items-center justify-center space-x-1.5 px-5 py-3 bg-leaf-600 hover:bg-leaf-700 active:scale-[0.98] text-white text-sm font-bold rounded-2xl shadow-md shadow-leaf-600/25 transition"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                <span>Add Log</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DYNAMIC SERVING SIZES PRESETS (Shows pieces, katori, bowl, glass for selected food) -->
+        <div id="servingUnitsContainer" class="hidden bg-stone-50/70 p-3 rounded-2xl border border-stone-200/80">
+          <div class="text-[11px] font-bold text-stone-500 uppercase tracking-wider mb-2 flex items-center justify-between">
+            <span class="flex items-center gap-1">
+              <span>🥄</span> Quick Serving Presets for <span id="servingSelectedFoodName" class="text-stone-800 font-extrabold ml-1"></span>
+            </span>
+            <span class="text-stone-400 font-normal">Click to auto-fill grams</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5" id="servingPills">
+            <!-- Dynamically populated per food item -->
+          </div>
+        </div>
+
+        <!-- Live Nutritional Calculation Preview -->
+        <div id="livePreviewContainer" class="hidden bg-gradient-to-r from-stone-50 to-leaf-50/40 border border-leaf-200/80 rounded-2xl p-3.5 text-xs text-stone-700 flex flex-wrap items-center justify-between gap-3 animate-fadeIn">
+          <div class="flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-leaf-600 animate-ping"></span>
+            <span class="font-extrabold text-stone-900" id="previewFoodName">Item</span>
+            <span class="text-stone-500 font-bold bg-white px-2 py-0.5 rounded-md border border-stone-200" id="previewWeightTag">100g</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-2 font-bold text-xs">
+            <span class="bg-stone-900 text-white px-2.5 py-1 rounded-lg"><span id="previewKcal">0</span> kcal</span>
+            <span class="text-rose-700 bg-rose-50 px-2.5 py-1 rounded-lg border border-rose-100">P: <span id="previewP">0</span>g</span>
+            <span class="text-amber-700 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-100">C: <span id="previewC">0</span>g</span>
+            <span class="text-indigo-700 bg-indigo-50 px-2.5 py-1 rounded-lg border border-indigo-100">F: <span id="previewF">0</span>g</span>
+            <span class="text-leaf-800 bg-leaf-100 px-2.5 py-1 rounded-lg border border-leaf-200">Fiber: <span id="previewFib">0</span>g</span>
+          </div>
+        </div>
+      </form>
+    </section>
+
+    <!-- ==================== LOGGED MEALS ACCORDIONS ==================== -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-extrabold text-stone-900 flex items-center gap-2">
+          <span>📋</span> Logged Meals for Selected Day
+        </h2>
+        <span class="text-xs font-semibold text-stone-500 bg-white px-3 py-1 rounded-full border border-stone-200" id="totalEntriesCount">0 items</span>
+      </div>
+
+      <div class="grid grid-cols-1 gap-4">
+        <!-- Breakfast Section -->
+        <div class="bg-white rounded-3xl border border-stone-200/90 shadow-xs overflow-hidden">
+          <div class="p-4 bg-stone-50/80 border-b border-stone-200/70 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="text-xl">🌅</span>
+              <h3 class="font-extrabold text-stone-800 text-sm sm:text-base">Breakfast</h3>
+              <span class="text-[10px] font-semibold text-stone-400">(Tiffins, Idli, Dosa, Pesarattu, Chai)</span>
+            </div>
+            <div class="text-xs font-bold text-stone-700 bg-white px-2.5 py-1 rounded-lg border border-stone-200" id="breakfastSubtotal">0 kcal</div>
+          </div>
+          <div id="breakfastList" class="divide-y divide-stone-100">
+            <!-- Populated via JS -->
+            <p class="p-5 text-xs text-stone-400 italic">No food logged for Breakfast yet.</p>
+          </div>
+        </div>
+
+        <!-- Lunch Section -->
+        <div class="bg-white rounded-3xl border border-stone-200/90 shadow-xs overflow-hidden">
+          <div class="p-4 bg-stone-50/80 border-b border-stone-200/70 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="text-xl">☀️</span>
+              <h3 class="font-extrabold text-stone-800 text-sm sm:text-base">Lunch</h3>
+              <span class="text-[10px] font-semibold text-stone-400">(Rice, Pappu, Sambar, Sabzi, Curd)</span>
+            </div>
+            <div class="text-xs font-bold text-stone-700 bg-white px-2.5 py-1 rounded-lg border border-stone-200" id="lunchSubtotal">0 kcal</div>
+          </div>
+          <div id="lunchList" class="divide-y divide-stone-100">
+            <p class="p-5 text-xs text-stone-400 italic">No food logged for Lunch yet.</p>
+          </div>
+        </div>
+
+        <!-- Evening Snacks Section -->
+        <div class="bg-white rounded-3xl border border-stone-200/90 shadow-xs overflow-hidden">
+          <div class="p-4 bg-stone-50/80 border-b border-stone-200/70 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="text-xl">☕</span>
+              <h3 class="font-extrabold text-stone-800 text-sm sm:text-base">Evening Snacks</h3>
+              <span class="text-[10px] font-semibold text-stone-400">(Sprouts, Makhana, Bajji, Filter Coffee, Sundal)</span>
+            </div>
+            <div class="text-xs font-bold text-stone-700 bg-white px-2.5 py-1 rounded-lg border border-stone-200" id="snacksSubtotal">0 kcal</div>
+          </div>
+          <div id="snacksList" class="divide-y divide-stone-100">
+            <p class="p-5 text-xs text-stone-400 italic">No food logged for Evening Snacks yet.</p>
+          </div>
+        </div>
+
+        <!-- Dinner Section -->
+        <div class="bg-white rounded-3xl border border-stone-200/90 shadow-xs overflow-hidden">
+          <div class="p-4 bg-stone-50/80 border-b border-stone-200/70 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="text-xl">🌙</span>
+              <h3 class="font-extrabold text-stone-800 text-sm sm:text-base">Dinner</h3>
+              <span class="text-[10px] font-semibold text-stone-400">(Roti, Ragi Mudde, Dal, Rasam, Light Curry)</span>
+            </div>
+            <div class="text-xs font-bold text-stone-700 bg-white px-2.5 py-1 rounded-lg border border-stone-200" id="dinnerSubtotal">0 kcal</div>
+          </div>
+          <div id="dinnerList" class="divide-y divide-stone-100">
+            <p class="p-5 text-xs text-stone-400 italic">No food logged for Dinner yet.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== BROWSE INDIAN FOODS LIBRARY (ACCORDION TABLE) ==================== -->
+    <section class="bg-white rounded-3xl border border-stone-200/90 p-5 sm:p-6 shadow-xs">
+      <div class="flex items-center justify-between cursor-pointer select-none" id="toggleDbBrowser">
+        <div class="flex items-center space-x-2.5">
+          <span class="p-2 bg-spice-100 text-spice-700 rounded-xl">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+          </span>
+          <div>
+            <h3 class="text-sm sm:text-base font-extrabold text-stone-900">Browse Complete South Indian & Desi Food Database</h3>
+            <p class="text-xs text-stone-400">View nutritional values per 100g with standard serving sizes</p>
+          </div>
+        </div>
+        <span id="dbToggleArrow" class="text-xs text-leaf-700 bg-leaf-50 font-bold px-3 py-1.5 rounded-xl border border-leaf-200 transition">▼ Expand Library</span>
+      </div>
+
+      <div id="dbBrowserContent" class="hidden mt-5 pt-5 border-t border-stone-100 space-y-4">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <input
+            type="text"
+            id="dbFilterInput"
+            placeholder="Search within library (e.g., Pappu, Dosa, Sprouts, Chutney...)"
+            class="flex-grow px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs font-medium focus:ring-2 focus:ring-leaf-500 outline-none"
+          />
+          <select id="dbCategoryFilter" class="px-3.5 py-2.5 bg-stone-50 border border-stone-200 rounded-xl text-xs text-stone-700 font-semibold focus:ring-2 focus:ring-leaf-500 outline-none">
+            <option value="ALL">All Categories</option>
+            <option value="tiffins_staples">Tiffins & Grains</option>
+            <option value="curries_dals">Curries, Dals & Rasam</option>
+            <option value="sprouts_legumes">Sprouts & Legumes</option>
+            <option value="snacks">Homemade Snacks</option>
+            <option value="fruits_veg">Fruits & Vegetables</option>
+            <option value="dairy_chutneys">Dairy & Chutneys</option>
+            <option value="Custom">Custom Items</option>
+          </select>
+        </div>
+
+        <div class="overflow-x-auto max-h-80 border border-stone-200 rounded-2xl">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-stone-50 text-stone-700 font-bold sticky top-0 border-b border-stone-200 z-10">
+              <tr>
+                <th class="py-3 px-3.5">Food Dish (Per 100g)</th>
+                <th class="py-3 px-3">Category</th>
+                <th class="py-3 px-3 text-right">Calories</th>
+                <th class="py-3 px-3 text-right">Protein</th>
+                <th class="py-3 px-3 text-right">Carbs</th>
+                <th class="py-3 px-3 text-right">Fat</th>
+                <th class="py-3 px-3 text-right">Fiber</th>
+                <th class="py-3 px-3 text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody id="dbTableBody" class="divide-y divide-stone-100 text-stone-700">
+              <!-- Dynamically rendered -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==================== FOOTER ==================== -->
+  <footer class="bg-white border-t border-stone-200 py-6 mt-10">
+    <div class="max-w-7xl mx-auto px-4 text-center text-xs text-stone-500 space-y-1">
+      <p class="font-bold text-stone-700">AaharTrack • Tailored Indian & South Indian Diet Tracker</p>
+      <p>Data is stored in this browser and website origin. Use Export regularly for a backup, especially when using Google Sites embeds.</p>
+      <p>Values based on Indian Food Composition Tables (NIN / ICMR guidelines).</p>
+    </div>
+  </footer>
+
+  <!-- ==================== MODAL 1: GOALS MODAL ==================== -->
+  <div id="goalsModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200">
+      <div class="flex items-center justify-between pb-3.5 border-b border-stone-100">
+        <div>
+          <h3 class="text-base font-extrabold text-stone-900">Personal Nutrition Goals</h3>
+          <p class="text-xs text-stone-400">Set your daily target calories and macronutrients</p>
+        </div>
+        <button id="closeGoalsModalBtn" class="text-stone-400 hover:text-stone-600 p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="goalsForm" class="mt-4 space-y-3.5">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1">Daily Target Calories (kcal)</label>
+          <input type="number" id="goalCaloriesInput" required min="800" max="8000" class="w-full px-3.5 py-2.5 border border-stone-300 rounded-xl text-sm font-bold focus:ring-2 focus:ring-leaf-500 outline-none" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-rose-700 mb-1">Protein (g)</label>
+            <input type="number" id="goalProteinInput" required min="10" max="500" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm font-bold focus:ring-2 focus:ring-rose-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-amber-700 mb-1">Carbs (g)</label>
+            <input type="number" id="goalCarbsInput" required min="10" max="800" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm font-bold focus:ring-2 focus:ring-amber-500 outline-none" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-indigo-700 mb-1">Fat (g)</label>
+            <input type="number" id="goalFatInput" required min="5" max="300" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm font-bold focus:ring-2 focus:ring-indigo-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-leaf-700 mb-1">Fiber (g)</label>
+            <input type="number" id="goalFiberInput" required min="5" max="120" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm font-bold focus:ring-2 focus:ring-leaf-500 outline-none" />
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-bold text-cyan-700">Daily Water Target (ml)</label>
+            <span class="text-[11px] font-semibold text-cyan-600" id="goalTargetGlassesText">12 glasses</span>
+          </div>
+          <div class="relative">
+            <input type="number" id="goalWaterInput" required min="500" max="10000" step="50" class="w-full px-3.5 py-2.5 border border-stone-300 rounded-xl text-sm font-bold focus:ring-2 focus:ring-cyan-500 outline-none text-right pr-9" />
+            <span class="absolute right-3.5 top-2.5 text-xs font-bold text-stone-400">ml</span>
+          </div>
+          <!-- Quick Water Target Preset Buttons -->
+          <div class="flex flex-wrap items-center gap-1.5 mt-2">
+            <span class="text-[10px] font-bold text-stone-400 uppercase">Presets:</span>
+            <button type="button" onclick="setWaterGoalInput(2000)" class="px-2 py-0.5 text-[11px] font-semibold bg-cyan-50 hover:bg-cyan-100 text-cyan-800 rounded-lg border border-cyan-200 transition">2000 ml</button>
+            <button type="button" onclick="setWaterGoalInput(2500)" class="px-2 py-0.5 text-[11px] font-semibold bg-cyan-50 hover:bg-cyan-100 text-cyan-800 rounded-lg border border-cyan-200 transition">2500 ml</button>
+            <button type="button" onclick="setWaterGoalInput(3000)" class="px-2 py-0.5 text-[11px] font-semibold bg-cyan-50 hover:bg-cyan-100 text-cyan-800 rounded-lg border border-cyan-200 transition">3000 ml</button>
+            <button type="button" onclick="setWaterGoalInput(3500)" class="px-2 py-0.5 text-[11px] font-semibold bg-cyan-50 hover:bg-cyan-100 text-cyan-800 rounded-lg border border-cyan-200 transition">3500 ml</button>
+            <button type="button" onclick="setWaterGoalInput(4000)" class="px-2 py-0.5 text-[11px] font-semibold bg-cyan-50 hover:bg-cyan-100 text-cyan-800 rounded-lg border border-cyan-200 transition">4000 ml</button>
+          </div>
+          <span class="text-[10px] text-stone-400 mt-1 block">Adjust intake based on summer heat, workout, and hydration goals.</span>
+        </div>
+
+        <div class="pt-3 flex space-x-2">
+          <button type="button" id="resetDefaultsGoalBtn" class="w-1/2 py-2.5 text-xs font-bold text-stone-600 bg-stone-100 hover:bg-stone-200 rounded-xl transition">
+            Reset Defaults
+          </button>
+          <button type="submit" class="w-1/2 py-2.5 text-xs font-bold text-white bg-leaf-600 hover:bg-leaf-700 rounded-xl shadow-md transition">
+            Save Goals
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 2: CUSTOM FOOD CREATOR ==================== -->
+  <div id="newFoodModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-stone-200">
+      <div class="flex items-center justify-between pb-3.5 border-b border-stone-100">
+        <div>
+          <h3 class="text-base font-extrabold text-stone-900">Add Custom Homemade Dish</h3>
+          <p class="text-xs text-stone-400">Nutritional values are calculated <strong>per 100 grams</strong></p>
+        </div>
+        <button id="closeNewFoodModalBtn" class="text-stone-400 hover:text-stone-600 p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="newFoodForm" class="mt-4 space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1">Dish Name *</label>
+          <input type="text" id="customFoodName" required placeholder="e.g., Amma's Avial or Gongura Mutton" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-leaf-500 outline-none" />
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1">Category</label>
+          <select id="customFoodCategory" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-leaf-500 outline-none">
+            <option value="tiffins_staples">Tiffins & Grains</option>
+            <option value="curries_dals">Curries, Dals & Rasam</option>
+            <option value="sprouts_legumes">Sprouts & Legumes</option>
+            <option value="snacks">Homemade Snacks</option>
+            <option value="fruits_veg">Fruits & Vegetables</option>
+            <option value="dairy_chutneys">Dairy & Chutneys</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1">Calories per 100g (kcal) *</label>
+          <input type="number" step="0.1" id="customFoodCalories" required min="0" max="900" placeholder="e.g. 140" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-leaf-500 outline-none" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-rose-700 mb-1">Protein / 100g (g) *</label>
+            <input type="number" step="0.1" id="customFoodProtein" required min="0" max="100" placeholder="0" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-leaf-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-amber-700 mb-1">Carbs / 100g (g) *</label>
+            <input type="number" step="0.1" id="customFoodCarbs" required min="0" max="100" placeholder="0" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-leaf-500 outline-none" />
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-indigo-700 mb-1">Fat / 100g (g) *</label>
+            <input type="number" step="0.1" id="customFoodFat" required min="0" max="100" placeholder="0" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-leaf-500 outline-none" />
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-leaf-700 mb-1">Fiber / 100g (g)</label>
+            <input type="number" step="0.1" id="customFoodFiber" min="0" max="50" value="1.0" class="w-full px-3 py-2 border border-stone-300 rounded-xl text-sm focus:ring-2 focus:ring-leaf-500 outline-none" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1">Default Serving Description (Optional)</label>
+          <div class="grid grid-cols-2 gap-2">
+            <input type="text" id="customServingLabel" placeholder="e.g. 1 medium bowl" class="px-3 py-2 border border-stone-300 rounded-xl text-xs focus:ring-2 focus:ring-leaf-500 outline-none" />
+            <input type="number" id="customServingGrams" placeholder="Weight in g (e.g. 150)" class="px-3 py-2 border border-stone-300 rounded-xl text-xs focus:ring-2 focus:ring-leaf-500 outline-none" />
+          </div>
+        </div>
+
+        <div class="pt-3">
+          <button type="submit" class="w-full py-2.5 text-xs font-bold text-white bg-leaf-600 hover:bg-leaf-700 rounded-xl shadow-md transition">
+            Save to My Food Library
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 3: EDIT QUANTITY MODAL ==================== -->
+  <div id="editLogModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-stone-200">
+      <div class="flex items-center justify-between pb-3 border-b border-stone-100">
+        <h3 class="text-base font-extrabold text-stone-900">Adjust Serving Weight</h3>
+        <button id="closeEditLogModalBtn" class="text-stone-400 hover:text-stone-600">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-3.5">
+        <div>
+          <div class="text-xs text-stone-400 font-semibold uppercase">Logged Item</div>
+          <div id="editEntryName" class="text-sm font-bold text-stone-800 mt-0.5"></div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1">New Weight (Grams / ml)</label>
+          <div class="relative">
+            <input type="number" id="editEntryWeightInput" min="1" max="5000" class="w-full px-3.5 py-2.5 border border-stone-300 rounded-xl text-sm font-bold focus:ring-2 focus:ring-leaf-500 outline-none text-right pr-8" />
+            <span class="absolute right-3.5 top-2.5 text-xs font-bold text-stone-400">g</span>
+          </div>
+        </div>
+
+        <div class="pt-2 flex space-x-2">
+          <button type="button" id="deleteEntryBtn" class="w-1/2 py-2 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-xl transition">
+            Delete Entry
+          </button>
+          <button type="button" id="saveEditEntryBtn" class="w-1/2 py-2 text-xs font-bold text-white bg-leaf-600 hover:bg-leaf-700 rounded-xl shadow-md transition">
+            Update Weight
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== MODAL 4: DIRECT QUICK WATER TARGET MODAL ==================== -->
+  <div id="waterTargetModal" class="hidden fixed inset-0 z-50 overflow-y-auto bg-stone-900/50 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-stone-200">
+      <div class="flex items-center justify-between pb-3.5 border-b border-stone-100">
+        <div class="flex items-center space-x-2">
+          <span class="text-xl">💧</span>
+          <div>
+            <h3 class="text-base font-extrabold text-stone-900">Set Daily Water Target</h3>
+            <p class="text-[11px] text-stone-400">Custom target will scale glasses & progress</p>
+          </div>
+        </div>
+        <button id="closeWaterTargetModalBtn" class="text-stone-400 hover:text-stone-600 p-1">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <form id="quickWaterTargetForm" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-stone-700 mb-1">Target Intake (ml per day)</label>
+          <div class="relative">
+            <input type="number" id="quickTargetWaterInput" required min="500" max="10000" step="50" class="w-full px-3.5 py-2.5 border border-stone-300 rounded-xl text-base font-black text-right pr-9 focus:ring-2 focus:ring-cyan-500 outline-none" />
+            <span class="absolute right-3.5 top-2.5 text-xs font-bold text-stone-400">ml</span>
+          </div>
+          <div id="quickModalGlassesCalc" class="text-[11px] text-cyan-700 font-bold mt-1 text-right">~12 glasses of 250ml</div>
+        </div>
+
+        <!-- Quick 1-click presets -->
+        <div>
+          <div class="text-[10px] font-bold text-stone-400 uppercase tracking-wider mb-2">Quick Presets</div>
+          <div class="grid grid-cols-3 gap-2 text-xs">
+            <button type="button" onclick="setQuickWaterModalVal(2000)" class="py-2 px-1 text-center font-bold bg-cyan-50 hover:bg-cyan-100 text-cyan-800 rounded-xl border border-cyan-200 transition">2000 ml<br><span class="text-[10px] font-medium text-cyan-600">(8 gls)</span></button>
+            <button type="button" onclick="setQuickWaterModalVal(2500)" class="py-2 px-1 text-center font-bold bg-cyan-50 hover:bg-cyan-100 text-cyan-800 rounded-xl border border-cyan-200 transition">2500 ml<br><span class="text-[10px] font-medium text-cyan-600">(10 gls)</span></button>
+            <button type="button" onclick="setQuickWaterModalVal(3000)" class="py-2 px-1 text-center font-bold bg-cyan-50 hover:bg-cyan-100 text-cyan-800 rounded-xl border border-cyan-200 transition">3000 ml<br><span class="text-[10px] font-medium text-cyan-600">(12 gls)</span></button>
+            <button type="button" onclick="setQuickWaterModalVal(3500)" class="py-2 px-1 text-center font-bold bg-cyan-50 hover:bg-cyan-100 text-cyan-800 rounded-xl border border-cyan-200 transition">3500 ml<br><span class="text-[10px] font-medium text-cyan-600">(14 gls)</span></button>
+            <button type="button" onclick="setQuickWaterModalVal(4000)" class="py-2 px-1 text-center font-bold bg-cyan-50 hover:bg-cyan-100 text-cyan-800 rounded-xl border border-cyan-200 transition">4000 ml<br><span class="text-[10px] font-medium text-cyan-600">(16 gls)</span></button>
+            <button type="button" onclick="setQuickWaterModalVal(4500)" class="py-2 px-1 text-center font-bold bg-cyan-50 hover:bg-cyan-100 text-cyan-800 rounded-xl border border-cyan-200 transition">4500 ml<br><span class="text-[10px] font-medium text-cyan-600">(18 gls)</span></button>
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" class="w-full py-2.5 text-xs font-bold text-white bg-cyan-600 hover:bg-cyan-700 rounded-xl shadow-md transition">
+            Save Water Target
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="fixed bottom-5 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+  <!-- ==================== JAVASCRIPT LOGIC ==================== -->
+  <script>
+    /* =========================================================
+     * 1. MASSIVE PRE-POPULATED SOUTH INDIAN & INDIAN FOOD DATABASE
+     * All nutritional values: Calories (kcal), Protein (g), Carbs (g),
+     * Fat (g), and Dietary Fiber (g) per 100 grams edible portion.
+     * With standard Indian serving sizes (pieces, katoris, cups, glasses).
+     * ========================================================= */
+    const INDIAN_FOOD_DATABASE = [
+      /* ---------- 1. TIFFINS & TRADITIONAL GRAIN STAPLES ---------- */
+      {
+        id: 'tif_1',
+        name: 'Idli (Steamed Rice & Urad Dal Cake)',
+        category: 'tiffins_staples',
+        cal: 138, p: 4.8, c: 28.5, f: 0.6, fib: 1.6,
+        servings: [
+          { name: '1 idli (~50g)', g: 50 },
+          { name: '2 idlis (~100g)', g: 100 },
+          { name: '1 plate (3 idlis, ~150g)', g: 150 },
+          { name: '1 plate (4 idlis, ~200g)', g: 200 }
+        ]
+      },
+      {
+        id: 'tif_2',
+        name: 'Plain Dosa (Sada Dosa)',
+        category: 'tiffins_staples',
+        cal: 168, p: 4.2, c: 29.0, f: 4.0, fib: 1.5,
+        servings: [
+          { name: '1 medium dosa (~80g)', g: 80 },
+          { name: '1 large roast dosa (~120g)', g: 120 },
+          { name: '2 medium dosas (~160g)', g: 160 }
+        ]
+      },
+      {
+        id: 'tif_3',
+        name: 'Masala Dosa (with Potato Masala)',
+        category: 'tiffins_staples',
+        cal: 206, p: 4.5, c: 31.0, f: 7.4, fib: 2.3,
+        servings: [
+          { name: '1 medium masala dosa (~130g)', g: 130 },
+          { name: '1 hotel large masala dosa (~180g)', g: 180 }
+        ]
+      },
+      {
+        id: 'tif_4',
+        name: 'Pesarattu (Andhra Whole Green Moong Dosa)',
+        category: 'tiffins_staples',
+        cal: 184, p: 8.8, c: 27.5, f: 4.6, fib: 4.5,
+        servings: [
+          { name: '1 pesarattu (~100g)', g: 100 },
+          { name: '2 pesarattus (~200g)', g: 200 },
+          { name: 'MLA Pesarattu (with Upma filling, ~175g)', g: 175 }
+        ]
+      },
+      {
+        id: 'tif_5',
+        name: 'Rava Dosa (Crispy Sooji Dosa)',
+        category: 'tiffins_staples',
+        cal: 195, p: 3.9, c: 32.5, f: 5.8, fib: 1.4,
+        servings: [
+          { name: '1 medium rava dosa (~110g)', g: 110 },
+          { name: '1 onion rava dosa (~140g)', g: 140 }
+        ]
+      },
+      {
+        id: 'tif_6',
+        name: 'Upma (Sooji/Rava Upma with Veggies)',
+        category: 'tiffins_staples',
+        cal: 152, p: 3.8, c: 23.8, f: 4.8, fib: 2.1,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 medium bowl / plate (~150g)', g: 150 },
+          { name: '1 full cup (~200g)', g: 200 }
+        ]
+      },
+      {
+        id: 'tif_7',
+        name: 'Pongal / Ven Pongal (Rice, Moong Dal & Ghee)',
+        category: 'tiffins_staples',
+        cal: 178, p: 4.9, c: 25.2, f: 6.8, fib: 2.2,
+        servings: [
+          { name: '1 katori / small bowl (~120g)', g: 120 },
+          { name: '1 medium bowl (~160g)', g: 160 },
+          { name: '1 full cup (~220g)', g: 220 }
+        ]
+      },
+      {
+        id: 'tif_8',
+        name: 'Medu Vada (Urad Dal Garelu)',
+        category: 'tiffins_staples',
+        cal: 262, p: 9.1, c: 25.5, f: 14.2, fib: 3.6,
+        servings: [
+          { name: '1 piece (~45g)', g: 45 },
+          { name: '2 pieces / 1 plate (~90g)', g: 90 },
+          { name: '1 Sambar Vada (2 vadas in sambar, ~220g)', g: 220 }
+        ]
+      },
+      {
+        id: 'tif_9',
+        name: 'Poori (Deep Fried Whole Wheat Bread)',
+        category: 'tiffins_staples',
+        cal: 325, p: 7.2, c: 45.4, f: 13.0, fib: 4.1,
+        servings: [
+          { name: '1 poori (~35g)', g: 35 },
+          { name: '2 pooris (~70g)', g: 70 },
+          { name: '3 pooris (~105g)', g: 105 }
+        ]
+      },
+      {
+        id: 'tif_10',
+        name: 'Idiyappam (Steamed Rice String Hoppers)',
+        category: 'tiffins_staples',
+        cal: 126, p: 2.2, c: 28.0, f: 0.4, fib: 1.0,
+        servings: [
+          { name: '1 piece (~50g)', g: 50 },
+          { name: '2 pieces (~100g)', g: 100 },
+          { name: '3 pieces (~150g)', g: 150 }
+        ]
+      },
+      {
+        id: 'tif_11',
+        name: 'Appam (Kerala Palappam)',
+        category: 'tiffins_staples',
+        cal: 145, p: 2.5, c: 29.8, f: 1.8, fib: 1.2,
+        servings: [
+          { name: '1 appam (~60g)', g: 60 },
+          { name: '2 appams (~120g)', g: 120 }
+        ]
+      },
+      {
+        id: 'tif_12',
+        name: 'Uttapam (Onion / Vegetable Uttapam)',
+        category: 'tiffins_staples',
+        cal: 165, p: 4.2, c: 27.2, f: 4.5, fib: 2.4,
+        servings: [
+          { name: '1 mini uttapam (~65g)', g: 65 },
+          { name: '1 regular uttapam (~120g)', g: 120 }
+        ]
+      },
+      {
+        id: 'tif_13',
+        name: 'Semiya Upma (Vermicelli Upma)',
+        category: 'tiffins_staples',
+        cal: 142, p: 3.2, c: 24.5, f: 3.6, fib: 1.5,
+        servings: [
+          { name: '1 medium bowl (~150g)', g: 150 },
+          { name: '1 full cup (~200g)', g: 200 }
+        ]
+      },
+      {
+        id: 'tif_14',
+        name: 'Cooked Sona Masoori Rice (White Rice)',
+        category: 'tiffins_staples',
+        cal: 130, p: 2.7, c: 28.2, f: 0.3, fib: 0.4,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 medium bowl (~150g)', g: 150 },
+          { name: '1 standard cup (~180g)', g: 180 },
+          { name: '1 plate / large serving (~250g)', g: 250 }
+        ]
+      },
+      {
+        id: 'tif_15',
+        name: 'Cooked Brown Rice',
+        category: 'tiffins_staples',
+        cal: 112, p: 2.6, c: 23.5, f: 0.9, fib: 1.8,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 medium bowl (~150g)', g: 150 },
+          { name: '1 cup (~195g)', g: 195 }
+        ]
+      },
+      {
+        id: 'tif_16',
+        name: 'Ragi Mudde (Finger Millet Ball)',
+        category: 'tiffins_staples',
+        cal: 122, p: 3.1, c: 25.8, f: 0.7, fib: 3.8,
+        servings: [
+          { name: '1 small mudde (~150g)', g: 150 },
+          { name: '1 standard medium mudde (~200g)', g: 200 },
+          { name: '1 large mudde (~260g)', g: 260 }
+        ]
+      },
+      {
+        id: 'tif_17',
+        name: 'Ragi Roti (Millet Flatbread with Onion & Cumin)',
+        category: 'tiffins_staples',
+        cal: 215, p: 4.6, c: 41.5, f: 3.5, fib: 6.4,
+        servings: [
+          { name: '1 ragi roti (~60g)', g: 60 },
+          { name: '2 ragi rotis (~120g)', g: 120 }
+        ]
+      },
+      {
+        id: 'tif_18',
+        name: 'Jowar / Jonna Roti (Sorghum Flatbread)',
+        category: 'tiffins_staples',
+        cal: 238, p: 7.2, c: 49.0, f: 1.8, fib: 6.8,
+        servings: [
+          { name: '1 jonna roti (~50g)', g: 50 },
+          { name: '2 jonna rotis (~100g)', g: 100 }
+        ]
+      },
+      {
+        id: 'tif_19',
+        name: 'Phulka / Roti (Whole Wheat, No Oil)',
+        category: 'tiffins_staples',
+        cal: 242, p: 8.6, c: 49.5, f: 1.2, fib: 7.4,
+        servings: [
+          { name: '1 phulka (~35g)', g: 35 },
+          { name: '2 phulkas (~70g)', g: 70 },
+          { name: '3 phulkas (~105g)', g: 105 }
+        ]
+      },
+      {
+        id: 'tif_20',
+        name: 'Roti with Pure Cow Ghee',
+        category: 'tiffins_staples',
+        cal: 282, p: 8.5, c: 49.0, f: 6.0, fib: 7.4,
+        servings: [
+          { name: '1 ghee roti (~40g)', g: 40 },
+          { name: '2 ghee rotis (~80g)', g: 80 }
+        ]
+      },
+      {
+        id: 'tif_21',
+        name: 'Curd Rice (Daddojanam / Thayir Sadam)',
+        category: 'tiffins_staples',
+        cal: 146, p: 3.7, c: 21.4, f: 5.2, fib: 0.6,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 medium bowl (~160g)', g: 160 },
+          { name: '1 large plate (~250g)', g: 250 }
+        ]
+      },
+      {
+        id: 'tif_22',
+        name: 'Lemon Rice (Chitranna / Nimmakaya Annam)',
+        category: 'tiffins_staples',
+        cal: 176, p: 3.2, c: 29.8, f: 5.1, fib: 1.2,
+        servings: [
+          { name: '1 medium bowl (~150g)', g: 150 },
+          { name: '1 plate (~240g)', g: 240 }
+        ]
+      },
+      {
+        id: 'tif_23',
+        name: 'Tamarind Rice (Pulihora / Puliyodharai)',
+        category: 'tiffins_staples',
+        cal: 198, p: 3.6, c: 32.5, f: 6.2, fib: 1.9,
+        servings: [
+          { name: '1 medium bowl (~150g)', g: 150 },
+          { name: '1 plate (~240g)', g: 240 }
+        ]
+      },
+      {
+        id: 'tif_24',
+        name: 'Bisi Bele Bath (Karnataka Spiced Rice-Lentil)',
+        category: 'tiffins_staples',
+        cal: 162, p: 4.8, c: 26.8, f: 4.3, fib: 2.8,
+        servings: [
+          { name: '1 medium bowl (~200g)', g: 200 },
+          { name: '1 large bowl (~300g)', g: 300 }
+        ]
+      },
+      {
+        id: 'tif_25',
+        name: 'South Indian Vegetable Biryani / Pulao',
+        category: 'tiffins_staples',
+        cal: 158, p: 3.9, c: 26.2, f: 4.2, fib: 2.6,
+        servings: [
+          { name: '1 medium bowl (~200g)', g: 200 },
+          { name: '1 full plate (~320g)', g: 320 }
+        ]
+      },
+      {
+        id: 'tif_26',
+        name: 'South Indian Chicken Biryani',
+        category: 'tiffins_staples',
+        cal: 192, p: 10.8, c: 23.2, f: 6.6, fib: 1.2,
+        servings: [
+          { name: '1 medium portion (~250g)', g: 250 },
+          { name: '1 full plate (~380g)', g: 380 }
+        ]
+      },
+
+      /* ---------- 2. DALS, SAMBARS, RASAM & CURRIES ---------- */
+      {
+        id: 'cur_1',
+        name: 'Andhra Toor Dal (Kandi Pappu with Tadka)',
+        category: 'curries_dals',
+        cal: 122, p: 6.6, c: 15.6, f: 3.9, fib: 3.6,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 medium bowl (~150g)', g: 150 }
+        ]
+      },
+      {
+        id: 'cur_2',
+        name: 'Tomato Pappu (Andhra Tomato Dal)',
+        category: 'curries_dals',
+        cal: 112, p: 5.9, c: 14.8, f: 3.5, fib: 3.3,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 medium bowl (~150g)', g: 150 }
+        ]
+      },
+      {
+        id: 'cur_3',
+        name: 'Gongura Pappu (Sorrel Leaves Dal)',
+        category: 'curries_dals',
+        cal: 116, p: 6.3, c: 14.2, f: 3.8, fib: 4.3,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 medium bowl (~150g)', g: 150 }
+        ]
+      },
+      {
+        id: 'cur_4',
+        name: 'Drumstick Sambar (South Indian Sambar)',
+        category: 'curries_dals',
+        cal: 76, p: 3.3, c: 10.8, f: 2.3, fib: 2.8,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 medium katori (~150g)', g: 150 },
+          { name: '1 deep bowl (~220g)', g: 220 }
+        ]
+      },
+      {
+        id: 'cur_5',
+        name: 'Tomato Rasam / Charu',
+        category: 'curries_dals',
+        cal: 36, p: 1.1, c: 5.6, f: 0.9, fib: 0.8,
+        servings: [
+          { name: '1 small cup (~100g)', g: 100 },
+          { name: '1 rasam bowl (~180g)', g: 180 },
+          { name: '1 deep serving (~240g)', g: 240 }
+        ]
+      },
+      {
+        id: 'cur_6',
+        name: 'Bendakaya Fry (Okra / Bhindi Vepudu)',
+        category: 'curries_dals',
+        cal: 138, p: 2.9, c: 12.2, f: 8.6, fib: 4.1,
+        servings: [
+          { name: '1 small katori (~80g)', g: 80 },
+          { name: '1 medium serving (~130g)', g: 130 }
+        ]
+      },
+      {
+        id: 'cur_7',
+        name: 'Gutti Vankaya Kura (Stuffed Brinjal Curry)',
+        category: 'curries_dals',
+        cal: 148, p: 3.3, c: 11.8, f: 9.9, fib: 4.6,
+        servings: [
+          { name: '1 piece with gravy (~100g)', g: 100 },
+          { name: '2 pieces with gravy (~180g)', g: 180 }
+        ]
+      },
+      {
+        id: 'cur_8',
+        name: 'Cabbage Poriyal / Fry (with Coconut & Mustard)',
+        category: 'curries_dals',
+        cal: 86, p: 2.2, c: 7.6, f: 5.3, fib: 3.2,
+        servings: [
+          { name: '1 small katori (~80g)', g: 80 },
+          { name: '1 medium bowl (~140g)', g: 140 }
+        ]
+      },
+      {
+        id: 'cur_9',
+        name: 'Aloo Vepudu (South Indian Potato Fry)',
+        category: 'curries_dals',
+        cal: 178, p: 2.6, c: 22.4, f: 8.9, fib: 2.5,
+        servings: [
+          { name: '1 small katori (~80g)', g: 80 },
+          { name: '1 medium bowl (~140g)', g: 140 }
+        ]
+      },
+      {
+        id: 'cur_10',
+        name: 'South Indian Chicken Curry (Kodi Kura)',
+        category: 'curries_dals',
+        cal: 168, p: 17.8, c: 4.3, f: 8.9, fib: 1.1,
+        servings: [
+          { name: '1 small bowl (2 pcs, ~150g)', g: 150 },
+          { name: '1 medium bowl (3 pcs, ~220g)', g: 220 }
+        ]
+      },
+      {
+        id: 'cur_11',
+        name: 'Chepala Pulusu (Andhra Fish Tamarind Curry)',
+        category: 'curries_dals',
+        cal: 132, p: 16.2, c: 5.1, f: 5.3, fib: 0.9,
+        servings: [
+          { name: '1 fish piece + gravy (~140g)', g: 140 },
+          { name: '2 fish pieces + gravy (~230g)', g: 230 }
+        ]
+      },
+      {
+        id: 'cur_12',
+        name: 'Egg Curry (South Indian Guddu Pulusu / Kura)',
+        category: 'curries_dals',
+        cal: 142, p: 9.6, c: 5.6, f: 9.1, fib: 0.9,
+        servings: [
+          { name: '1 egg with gravy (~130g)', g: 130 },
+          { name: '2 eggs with gravy (~210g)', g: 210 }
+        ]
+      },
+      {
+        id: 'cur_13',
+        name: 'Chana Masala (North & South Indian Gravy)',
+        category: 'curries_dals',
+        cal: 146, p: 6.9, c: 19.6, f: 4.6, fib: 5.6,
+        servings: [
+          { name: '1 katori (~120g)', g: 120 },
+          { name: '1 medium bowl (~180g)', g: 180 }
+        ]
+      },
+      {
+        id: 'cur_14',
+        name: 'Palak Paneer',
+        category: 'curries_dals',
+        cal: 172, p: 9.3, c: 5.6, f: 12.6, fib: 2.7,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 medium bowl (~160g)', g: 160 }
+        ]
+      },
+
+      /* ---------- 3. SPROUTS, LEGUMES & HIGH-PROTEIN ---------- */
+      {
+        id: 'spr_1',
+        name: 'Sprouted Green Moong (Raw)',
+        category: 'sprouts_legumes',
+        cal: 105, p: 8.8, c: 18.5, f: 0.6, fib: 7.6,
+        servings: [
+          { name: '1 handful / small bowl (~60g)', g: 60 },
+          { name: '1 medium katori (~100g)', g: 100 },
+          { name: '1 cup (~150g)', g: 150 }
+        ]
+      },
+      {
+        id: 'spr_2',
+        name: 'Sprouted Green Moong (Steamed / Boiled)',
+        category: 'sprouts_legumes',
+        cal: 102, p: 8.2, c: 17.8, f: 0.5, fib: 6.8,
+        servings: [
+          { name: '1 small katori (~70g)', g: 70 },
+          { name: '1 medium katori (~110g)', g: 110 },
+          { name: '1 full bowl (~160g)', g: 160 }
+        ]
+      },
+      {
+        id: 'spr_3',
+        name: 'Sprouted Kala Chana (Black Chickpeas, Raw)',
+        category: 'sprouts_legumes',
+        cal: 145, p: 9.8, c: 22.0, f: 1.8, fib: 8.2,
+        servings: [
+          { name: '1 fistful / small bowl (~60g)', g: 60 },
+          { name: '1 medium katori (~100g)', g: 100 },
+          { name: '1 full cup (~150g)', g: 150 }
+        ]
+      },
+      {
+        id: 'spr_4',
+        name: 'Sprouted Kala Chana (Boiled with Tadka)',
+        category: 'sprouts_legumes',
+        cal: 140, p: 8.9, c: 21.0, f: 2.5, fib: 7.5,
+        servings: [
+          { name: '1 medium katori (~120g)', g: 120 },
+          { name: '1 cup (~180g)', g: 180 }
+        ]
+      },
+      {
+        id: 'spr_5',
+        name: 'Sprouted Horsegram (Ulavalu, Raw)',
+        category: 'sprouts_legumes',
+        cal: 126, p: 9.6, c: 20.6, f: 0.8, fib: 9.1,
+        servings: [
+          { name: '1 fistful (~50g)', g: 50 },
+          { name: '1 medium katori (~100g)', g: 100 }
+        ]
+      },
+      {
+        id: 'spr_6',
+        name: 'Boiled Peanuts (Palli / Senagapappu with Salt)',
+        category: 'sprouts_legumes',
+        cal: 318, p: 13.5, c: 21.2, f: 22.0, fib: 8.0,
+        servings: [
+          { name: '1 small fistful (~40g)', g: 40 },
+          { name: '1 small cup (~70g)', g: 70 },
+          { name: '1 medium katori (~100g)', g: 100 }
+        ]
+      },
+      {
+        id: 'spr_7',
+        name: 'Chana Sundal (Chickpeas with Mustard & Coconut)',
+        category: 'sprouts_legumes',
+        cal: 156, p: 7.8, c: 22.6, f: 4.3, fib: 6.8,
+        servings: [
+          { name: '1 small bowl (~80g)', g: 80 },
+          { name: '1 medium katori (~140g)', g: 140 }
+        ]
+      },
+      {
+        id: 'spr_8',
+        name: 'Boiled Rajma (Red Kidney Beans)',
+        category: 'sprouts_legumes',
+        cal: 127, p: 8.7, c: 22.8, f: 0.5, fib: 6.4,
+        servings: [
+          { name: '1 medium katori (~120g)', g: 120 },
+          { name: '1 cup (~180g)', g: 180 }
+        ]
+      },
+      {
+        id: 'spr_9',
+        name: 'Boiled Soybeans',
+        category: 'sprouts_legumes',
+        cal: 173, p: 16.6, c: 9.9, f: 9.0, fib: 6.0,
+        servings: [
+          { name: '1 small bowl (~75g)', g: 75 },
+          { name: '1 medium katori (~120g)', g: 120 }
+        ]
+      },
+      {
+        id: 'spr_10',
+        name: 'Fresh Paneer (Raw, Full Cream)',
+        category: 'sprouts_legumes',
+        cal: 285, p: 18.5, c: 3.5, f: 22.0, fib: 0.0,
+        servings: [
+          { name: '2 cubes (~30g)', g: 30 },
+          { name: '1 medium slab (~60g)', g: 60 },
+          { name: '100g slab (~100g)', g: 100 }
+        ]
+      },
+      {
+        id: 'spr_11',
+        name: 'Low-Fat Paneer (Raw)',
+        category: 'sprouts_legumes',
+        cal: 176, p: 25.0, c: 4.1, f: 6.5, fib: 0.0,
+        servings: [
+          { name: '1 small slab (~50g)', g: 50 },
+          { name: '100g portion (~100g)', g: 100 }
+        ]
+      },
+      {
+        id: 'spr_12',
+        name: 'Cooked Soya Chunks (Nutrela / Meal Maker)',
+        category: 'sprouts_legumes',
+        cal: 112, p: 16.8, c: 9.6, f: 0.6, fib: 4.2,
+        servings: [
+          { name: '1 small katori (~80g)', g: 80 },
+          { name: '1 medium bowl (~140g)', g: 140 }
+        ]
+      },
+
+      /* ---------- 4. HOMEMADE SOUTH INDIAN & DESI SNACKS ---------- */
+      {
+        id: 'snk_1',
+        name: 'Murukku / Jantikalu (Crispy Rice-Besan Rings)',
+        category: 'snacks',
+        cal: 486, p: 7.2, c: 59.2, f: 25.1, fib: 3.5,
+        servings: [
+          { name: '1 small piece (~15g)', g: 15 },
+          { name: '1 medium murukku (~25g)', g: 25 },
+          { name: '3 pieces (~75g)', g: 75 }
+        ]
+      },
+      {
+        id: 'snk_2',
+        name: 'Chekodilu (Andhra Ring Murukku)',
+        category: 'snacks',
+        cal: 495, p: 6.5, c: 62.0, f: 25.5, fib: 2.8,
+        servings: [
+          { name: '1 small handful (~30g)', g: 30 },
+          { name: '1 small bowl (~60g)', g: 60 }
+        ]
+      },
+      {
+        id: 'snk_3',
+        name: 'Ribbon Pakoda (Ola Pakoda)',
+        category: 'snacks',
+        cal: 512, p: 7.5, c: 56.4, f: 29.2, fib: 3.0,
+        servings: [
+          { name: '1 handful (~30g)', g: 30 },
+          { name: '1 cup (~60g)', g: 60 }
+        ]
+      },
+      {
+        id: 'snk_4',
+        name: 'Chekkalu / Thattai (Rice-Chana Dal Crackers)',
+        category: 'snacks',
+        cal: 472, p: 7.0, c: 61.2, f: 22.6, fib: 3.2,
+        servings: [
+          { name: '1 piece (~20g)', g: 20 },
+          { name: '2 pieces (~40g)', g: 40 },
+          { name: '3 pieces (~60g)', g: 60 }
+        ]
+      },
+      {
+        id: 'snk_5',
+        name: 'Onion Pakoda (Ulli Vada / Kanda Bhaji)',
+        category: 'snacks',
+        cal: 316, p: 6.9, c: 32.2, f: 18.2, fib: 3.8,
+        servings: [
+          { name: '1 small plate (4-5 pcs, ~80g)', g: 80 },
+          { name: '1 medium bowl (~130g)', g: 130 }
+        ]
+      },
+      {
+        id: 'snk_6',
+        name: 'Mirchi Bajji (Andhra Mirapakaya Bajji)',
+        category: 'snacks',
+        cal: 262, p: 5.6, c: 28.2, f: 14.1, fib: 3.6,
+        servings: [
+          { name: '1 piece (~55g)', g: 55 },
+          { name: '2 pieces (~110g)', g: 110 }
+        ]
+      },
+      {
+        id: 'snk_7',
+        name: 'Boondi Mixture (South Indian Spicy Mixture)',
+        category: 'snacks',
+        cal: 532, p: 9.2, c: 52.4, f: 32.2, fib: 4.5,
+        servings: [
+          { name: '2 tablespoons (~30g)', g: 30 },
+          { name: '1 small cup (~50g)', g: 50 }
+        ]
+      },
+      {
+        id: 'snk_8',
+        name: 'Masala Vada (Paruppu Vadai / Chana Dal Vada)',
+        category: 'snacks',
+        cal: 292, p: 11.6, c: 32.4, f: 13.6, fib: 6.5,
+        servings: [
+          { name: '1 piece (~40g)', g: 40 },
+          { name: '2 pieces (~80g)', g: 80 }
+        ]
+      },
+      {
+        id: 'snk_9',
+        name: 'Roasted Makhana (Foxnuts with Minimal Ghee)',
+        category: 'snacks',
+        cal: 362, p: 9.6, c: 64.2, f: 7.6, fib: 8.1,
+        servings: [
+          { name: '1 medium bowl (~25g)', g: 25 },
+          { name: '1 large bowl (~40g)', g: 40 }
+        ]
+      },
+      {
+        id: 'snk_10',
+        name: 'Boiled Sweet Corn',
+        category: 'snacks',
+        cal: 96, p: 3.4, c: 21.0, f: 1.5, fib: 2.4,
+        servings: [
+          { name: '1 small cup (~100g)', g: 100 },
+          { name: '1 medium corn cob (~140g)', g: 140 }
+        ]
+      },
+      {
+        id: 'snk_11',
+        name: 'Boiled Whole Egg',
+        category: 'snacks',
+        cal: 143, p: 12.6, c: 0.7, f: 9.5, fib: 0.0,
+        servings: [
+          { name: '1 egg (~50g)', g: 50 },
+          { name: '2 eggs (~100g)', g: 100 },
+          { name: '3 eggs (~150g)', g: 150 }
+        ]
+      },
+      {
+        id: 'snk_12',
+        name: 'Indian Masala Omelette (1 Egg + Veggies + Oil)',
+        category: 'snacks',
+        cal: 158, p: 7.2, c: 2.8, f: 13.2, fib: 0.5,
+        servings: [
+          { name: 'Single egg omelette (~75g)', g: 75 },
+          { name: 'Double egg omelette (~140g)', g: 140 }
+        ]
+      },
+
+      /* ---------- 5. LOCAL INDIAN FRUITS & VEGETABLES ---------- */
+      {
+        id: 'frt_1',
+        name: 'Banana (Yellaki / Small Elaichi Banana)',
+        category: 'fruits_veg',
+        cal: 90, p: 1.2, c: 23.1, f: 0.3, fib: 2.6,
+        servings: [
+          { name: '1 yellaki banana (~60g)', g: 60 },
+          { name: '2 yellaki bananas (~120g)', g: 120 }
+        ]
+      },
+      {
+        id: 'frt_2',
+        name: 'Banana (Robusta / Standard Large)',
+        category: 'fruits_veg',
+        cal: 89, p: 1.1, c: 22.8, f: 0.3, fib: 2.6,
+        servings: [
+          { name: '1 medium robusta (~115g)', g: 115 },
+          { name: '1 large robusta (~145g)', g: 145 }
+        ]
+      },
+      {
+        id: 'frt_3',
+        name: 'Guava (Jama / Amrud / Peykka)',
+        category: 'fruits_veg',
+        cal: 68, p: 2.6, c: 14.3, f: 1.0, fib: 5.4,
+        servings: [
+          { name: '1 small guava (~80g)', g: 80 },
+          { name: '1 medium guava (~130g)', g: 130 },
+          { name: '1 large guava (~180g)', g: 180 }
+        ]
+      },
+      {
+        id: 'frt_4',
+        name: 'Papaya (Ripe, Cubed)',
+        category: 'fruits_veg',
+        cal: 43, p: 0.5, c: 10.8, f: 0.3, fib: 1.7,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 cup cubed (~145g)', g: 145 },
+          { name: '1 medium bowl (~200g)', g: 200 }
+        ]
+      },
+      {
+        id: 'frt_5',
+        name: 'Mango (Banganapalli / Alphonso Slices)',
+        category: 'fruits_veg',
+        cal: 65, p: 0.8, c: 17.0, f: 0.4, fib: 1.8,
+        servings: [
+          { name: '1/2 cup slices (~85g)', g: 85 },
+          { name: '1 full cup slices (~165g)', g: 165 },
+          { name: '1 whole medium mango (~250g)', g: 250 }
+        ]
+      },
+      {
+        id: 'frt_6',
+        name: 'Pomegranate (Anar / Danimma Arils)',
+        category: 'fruits_veg',
+        cal: 83, p: 1.7, c: 18.7, f: 1.2, fib: 4.0,
+        servings: [
+          { name: '1/2 cup arils (~85g)', g: 85 },
+          { name: '1 cup arils (~175g)', g: 175 }
+        ]
+      },
+      {
+        id: 'frt_7',
+        name: 'Sapota (Chiku / Sapodilla)',
+        category: 'fruits_veg',
+        cal: 83, p: 0.4, c: 20.0, f: 1.1, fib: 5.3,
+        servings: [
+          { name: '1 medium chiku (~75g)', g: 75 },
+          { name: '2 chikus (~150g)', g: 150 }
+        ]
+      },
+      {
+        id: 'frt_8',
+        name: 'Custard Apple (Sitaphal / Sharifa Pulp)',
+        category: 'fruits_veg',
+        cal: 94, p: 2.1, c: 23.6, f: 0.3, fib: 4.4,
+        servings: [
+          { name: '1 small sitaphal pulp (~90g)', g: 90 },
+          { name: '1 medium sitaphal (~150g)', g: 150 }
+        ]
+      },
+      {
+        id: 'frt_9',
+        name: 'Watermelon (Diced Fresh)',
+        category: 'fruits_veg',
+        cal: 30, p: 0.6, c: 7.6, f: 0.2, fib: 0.4,
+        servings: [
+          { name: '1 slice / wedge (~150g)', g: 150 },
+          { name: '1 large bowl (~250g)', g: 250 }
+        ]
+      },
+      {
+        id: 'frt_10',
+        name: 'Mosambi (Sweet Lime)',
+        category: 'fruits_veg',
+        cal: 43, p: 0.8, c: 9.3, f: 0.3, fib: 1.4,
+        servings: [
+          { name: '1 medium mosambi (~130g)', g: 130 },
+          { name: '1 glass fresh juice (~220g)', g: 220 }
+        ]
+      },
+      {
+        id: 'frt_11',
+        name: 'Amla (Indian Gooseberry / Usirikaya)',
+        category: 'fruits_veg',
+        cal: 44, p: 0.9, c: 10.2, f: 0.6, fib: 4.3,
+        servings: [
+          { name: '1 amla (~25g)', g: 25 },
+          { name: '2 amlas (~50g)', g: 50 },
+          { name: 'Fresh amla shot (~30ml)', g: 30 }
+        ]
+      },
+      {
+        id: 'frt_12',
+        name: 'Jackfruit (Ripe Flesh / Panasa)',
+        category: 'fruits_veg',
+        cal: 95, p: 1.7, c: 23.2, f: 0.6, fib: 1.5,
+        servings: [
+          { name: '3-4 pods (~100g)', g: 100 },
+          { name: '1 cup pods (~160g)', g: 160 }
+        ]
+      },
+      {
+        id: 'veg_1',
+        name: 'Bottle Gourd (Sorakkaya / Lauki, Cooked)',
+        category: 'fruits_veg',
+        cal: 15, p: 0.6, c: 3.4, f: 0.1, fib: 1.2,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 medium bowl (~180g)', g: 180 }
+        ]
+      },
+      {
+        id: 'veg_2',
+        name: 'Ridge Gourd (Beerakaya / Turai, Cooked)',
+        category: 'fruits_veg',
+        cal: 18, p: 0.7, c: 3.5, f: 0.2, fib: 1.5,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 medium bowl (~180g)', g: 180 }
+        ]
+      },
+      {
+        id: 'veg_3',
+        name: 'Bitter Gourd (Kakarakaya / Karela Fry)',
+        category: 'fruits_veg',
+        cal: 38, p: 1.8, c: 5.2, f: 1.4, fib: 2.8,
+        servings: [
+          { name: '1 small katori (~80g)', g: 80 },
+          { name: '1 medium bowl (~140g)', g: 140 }
+        ]
+      },
+      {
+        id: 'veg_4',
+        name: 'Drumstick (Munakkaya Pods, Boiled Edible Part)',
+        category: 'fruits_veg',
+        cal: 37, p: 2.1, c: 8.5, f: 0.2, fib: 3.2,
+        servings: [
+          { name: '2 pieces edible pulp (~50g)', g: 50 },
+          { name: '4 pieces edible pulp (~100g)', g: 100 }
+        ]
+      },
+      {
+        id: 'veg_5',
+        name: 'Snake Gourd (Potlakaya, Cooked)',
+        category: 'fruits_veg',
+        cal: 17, p: 0.5, c: 3.3, f: 0.3, fib: 1.3,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 medium bowl (~160g)', g: 160 }
+        ]
+      },
+      {
+        id: 'veg_6',
+        name: 'Thotakura / Amaranth Leaves (Cooked Poriyal)',
+        category: 'fruits_veg',
+        cal: 32, p: 2.6, c: 4.2, f: 0.8, fib: 3.1,
+        servings: [
+          { name: '1 small katori (~80g)', g: 80 },
+          { name: '1 medium bowl (~140g)', g: 140 }
+        ]
+      },
+      {
+        id: 'veg_7',
+        name: 'Gongura Leaves (Fresh Sorrel Leaves)',
+        category: 'fruits_veg',
+        cal: 24, p: 1.8, c: 3.2, f: 0.4, fib: 2.5,
+        servings: [
+          { name: '1 handful leaves (~50g)', g: 50 },
+          { name: '1 bowl raw leaves (~100g)', g: 100 }
+        ]
+      },
+      {
+        id: 'veg_8',
+        name: 'Cucumber (Raw Indian Kheera with Peel)',
+        category: 'fruits_veg',
+        cal: 15, p: 0.7, c: 3.6, f: 0.1, fib: 0.8,
+        servings: [
+          { name: '1/2 cucumber (~60g)', g: 60 },
+          { name: '1 medium whole cucumber (~120g)', g: 120 }
+        ]
+      },
+      {
+        id: 'veg_9',
+        name: 'Carrot (Raw Gajar Slices)',
+        category: 'fruits_veg',
+        cal: 41, p: 0.9, c: 9.6, f: 0.2, fib: 2.8,
+        servings: [
+          { name: '1 medium carrot (~60g)', g: 60 },
+          { name: '1 cup sliced (~110g)', g: 110 }
+        ]
+      },
+      {
+        id: 'veg_10',
+        name: 'Beetroot (Boiled / Raw Slices)',
+        category: 'fruits_veg',
+        cal: 43, p: 1.6, c: 9.6, f: 0.2, fib: 2.8,
+        servings: [
+          { name: '1 small beetroot (~70g)', g: 70 },
+          { name: '1 medium bowl (~130g)', g: 130 }
+        ]
+      },
+
+      /* ---------- 6. DAIRY, CHUTNEYS & DRINKS ---------- */
+      {
+        id: 'dai_1',
+        name: 'Homemade Curd / Dahi (Cow Milk)',
+        category: 'dairy_chutneys',
+        cal: 61, p: 3.4, c: 4.7, f: 3.3, fib: 0.0,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 medium bowl (~150g)', g: 150 },
+          { name: '1 full cup (~200g)', g: 200 }
+        ]
+      },
+      {
+        id: 'dai_2',
+        name: 'Homemade Curd / Buffalo Milk (Thick Dahi)',
+        category: 'dairy_chutneys',
+        cal: 98, p: 3.8, c: 5.2, f: 6.9, fib: 0.0,
+        servings: [
+          { name: '1 small katori (~100g)', g: 100 },
+          { name: '1 medium bowl (~150g)', g: 150 }
+        ]
+      },
+      {
+        id: 'dai_3',
+        name: 'Spiced Buttermilk (Majjiga / Neer Mor / Chaas)',
+        category: 'dairy_chutneys',
+        cal: 21, p: 1.3, c: 2.1, f: 0.9, fib: 0.1,
+        servings: [
+          { name: '1 small glass (~180ml)', g: 180 },
+          { name: '1 steel tumbler (~220ml)', g: 220 },
+          { name: '1 large tall glass (~300ml)', g: 300 }
+        ]
+      },
+      {
+        id: 'dai_4',
+        name: 'Pure Desi Cow Ghee (Neyi)',
+        category: 'dairy_chutneys',
+        cal: 898, p: 0.0, c: 0.0, f: 99.5, fib: 0.0,
+        servings: [
+          { name: '1 teaspoon (~5g)', g: 5 },
+          { name: '1 standard spoon (~10g)', g: 10 },
+          { name: '1 tablespoon (~14g)', g: 14 }
+        ]
+      },
+      {
+        id: 'dai_5',
+        name: 'Coconut Chutney (South Indian Style with Tadka)',
+        category: 'dairy_chutneys',
+        cal: 218, p: 3.3, c: 8.6, f: 19.8, fib: 4.6,
+        servings: [
+          { name: '1 tablespoon (~15g)', g: 15 },
+          { name: '2 tablespoons (~30g)', g: 30 },
+          { name: '1 small katori (~60g)', g: 60 }
+        ]
+      },
+      {
+        id: 'dai_6',
+        name: 'Peanut / Palli Chutney (Groundnut Chutney)',
+        category: 'dairy_chutneys',
+        cal: 315, p: 12.2, c: 14.8, f: 23.8, fib: 4.9,
+        servings: [
+          { name: '1 tablespoon (~15g)', g: 15 },
+          { name: '2 tablespoons (~30g)', g: 30 },
+          { name: '1 small katori (~60g)', g: 60 }
+        ]
+      },
+      {
+        id: 'dai_7',
+        name: 'Tomato Chutney (South Indian Spicy)',
+        category: 'dairy_chutneys',
+        cal: 98, p: 1.9, c: 8.2, f: 6.4, fib: 2.1,
+        servings: [
+          { name: '1 tablespoon (~15g)', g: 15 },
+          { name: '2 tablespoons (~30g)', g: 30 },
+          { name: '1 small katori (~60g)', g: 60 }
+        ]
+      },
+      {
+        id: 'dai_8',
+        name: 'South Indian Filter Coffee (Milk & 1 tsp Sugar)',
+        category: 'dairy_chutneys',
+        cal: 72, p: 2.2, c: 8.8, f: 3.0, fib: 0.0,
+        servings: [
+          { name: '1 traditional davarah tumbler (~120ml)', g: 120 },
+          { name: '1 coffee mug (~180ml)', g: 180 }
+        ]
+      },
+      {
+        id: 'dai_9',
+        name: 'Indian Masala Chai (with Milk & 1 tsp Sugar)',
+        category: 'dairy_chutneys',
+        cal: 66, p: 1.9, c: 8.2, f: 2.6, fib: 0.0,
+        servings: [
+          { name: '1 cutting glass (~100ml)', g: 100 },
+          { name: '1 regular cup (~150ml)', g: 150 }
+        ]
+      },
+      {
+        id: 'dai_10',
+        name: 'Tender Coconut Water (Elaneer / Kobbari Neellu)',
+        category: 'dairy_chutneys',
+        cal: 19, p: 0.7, c: 3.7, f: 0.2, fib: 1.1,
+        servings: [
+          { name: '1 glass (~200ml)', g: 200 },
+          { name: '1 whole tender coconut (~300ml)', g: 300 }
+        ]
+      }
+    ];
+
+    const DEFAULT_GOALS = {
+      calories: 2000,
+      protein: 120,
+      carbs: 230,
+      fat: 55,
+      fiber: 30,
+      water: 3000
+    };
+
+    /* =========================================================
+     * 2. STATE AND STORAGE HELPERS
+     * ========================================================= */
+    let currentSelectedDate = getTodayDateString();
+    let currentFoodDatabase = [];
+    let dailyGoals = { ...DEFAULT_GOALS };
+    let currentSelectedFood = null;
+    let editingLogItem = null;
+    let activeCategoryFilter = 'ALL';
+
+    function getTodayDateString() {
+      const today = new Date();
+      return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    }
+
+    const AAHAR_STORAGE_KEYS = [
+      'aahar_goals_v2',
+      'aahar_custom_foods_v2',
+      'aahar_logs_v2',
+      'aahar_water_v2'
+    ];
+
+    function testLocalStorage() {
+      try {
+        const key = '__aahar_storage_test__';
+        localStorage.setItem(key, 'ok');
+        const passed = localStorage.getItem(key) === 'ok';
+        localStorage.removeItem(key);
+        return passed;
+      } catch (err) {
+        console.error('AaharTrack browser storage is unavailable:', err);
+        return false;
+      }
+    }
+
+    function exportAaharBackup() {
+      try {
+        const payload = {
+          app: 'AaharTrack',
+          formatVersion: 1,
+          exportedAt: new Date().toISOString(),
+          data: {}
+        };
+        AAHAR_STORAGE_KEYS.forEach(key => {
+          const value = localStorage.getItem(key);
+          if (value !== null) payload.data[key] = JSON.parse(value);
+        });
+        const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `aahartrack-backup-${getTodayDateString()}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast('Backup downloaded. Keep it somewhere safe.', 'success');
+      } catch (err) {
+        console.error('Backup export failed:', err);
+        showToast('Could not export data. Browser storage may be blocked.', 'error');
+      }
+    }
+
+    function importAaharBackupFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const payload = JSON.parse(String(reader.result || ''));
+          if (payload.app !== 'AaharTrack' || !payload.data || typeof payload.data !== 'object') {
+            throw new Error('This is not an AaharTrack backup file.');
+          }
+          const allowed = AAHAR_STORAGE_KEYS;
+          const importedKeys = Object.keys(payload.data).filter(key => allowed.includes(key));
+          if (!importedKeys.length) throw new Error('No recognised tracker data was found in this backup.');
+          const summary = importedKeys.map(key => key.replace('aahar_', '').replace('_v2', '')).join(', ');
+          if (!confirm(`Restore backup data (${summary})? Existing data for these categories will be replaced. Export a backup of your current data first if you want to keep it.`)) return;
+          importedKeys.forEach(key => localStorage.setItem(key, JSON.stringify(payload.data[key])));
+          showToast('Backup restored. Reloading tracker…', 'success');
+          setTimeout(() => window.location.reload(), 700);
+        } catch (err) {
+          console.error('Backup import failed:', err);
+          showToast(err.message || 'Could not restore backup.', 'error');
+        }
+      };
+      reader.onerror = () => showToast('Could not read the selected backup file.', 'error');
+      reader.readAsText(file);
+    }
+
+    function setupBackupControls() {
+      const exportBtn = document.getElementById('exportBackupBtn');
+      const importBtn = document.getElementById('importBackupBtn');
+      const fileInput = document.getElementById('importBackupFile');
+      if (exportBtn) exportBtn.addEventListener('click', exportAaharBackup);
+      if (importBtn && fileInput) importBtn.addEventListener('click', () => fileInput.click());
+      if (fileInput) fileInput.addEventListener('change', event => {
+        importAaharBackupFile(event.target.files && event.target.files[0]);
+        event.target.value = '';
+      });
+    }
+
+    function initApp() {
+      setupBackupControls();
+      if (!testLocalStorage()) {
+        console.warn('AaharTrack cannot access persistent browser storage in this embed. Host the HTML on a stable web origin and embed it by URL, or use Export/Import backups where available.');
+        setTimeout(() => showToast('Warning: browser storage is blocked here. Your entries may not persist after refresh. Host this HTML on a stable site and embed by URL.', 'error'), 500);
+      }
+      loadGoals();
+      loadDatabase();
+      setupDateSelector();
+      setupCategoryPills();
+      setupEventListeners();
+      setupWaterEventListeners();
+      renderTodayLog();
+      renderWaterTracker();
+      renderDatabaseTable();
+      updateItemsBadge();
+    }
+
+    function loadGoals() {
+      try {
+        const stored = localStorage.getItem('aahar_goals_v2');
+        if (stored) {
+          // Merge with DEFAULT_GOALS so missing or legacy properties always have valid values
+          dailyGoals = { ...DEFAULT_GOALS, ...JSON.parse(stored) };
+        }
+      } catch (e) {
+        console.error('Error reading goals', e);
+      }
+      updateGoalsDisplay();
+    }
+
+    function saveGoals() {
+      try {
+        localStorage.setItem('aahar_goals_v2', JSON.stringify(dailyGoals));
+      } catch (e) {
+        console.error('Error saving goals', e);
+      }
+      updateGoalsDisplay();
+      renderProgressStats();
+    }
+
+    function loadDatabase() {
+      try {
+        const customFoods = JSON.parse(localStorage.getItem('aahar_custom_foods_v2')) || [];
+        currentFoodDatabase = [...INDIAN_FOOD_DATABASE, ...customFoods];
+      } catch (e) {
+        currentFoodDatabase = [...INDIAN_FOOD_DATABASE];
+      }
+    }
+
+    function saveCustomFood(newFood) {
+      try {
+        const customFoods = JSON.parse(localStorage.getItem('aahar_custom_foods_v2')) || [];
+        customFoods.push(newFood);
+        localStorage.setItem('aahar_custom_foods_v2', JSON.stringify(customFoods));
+        loadDatabase();
+        renderDatabaseTable();
+        updateItemsBadge();
+        showToast(`Saved "${newFood.name}" to library!`, 'success');
+      } catch (e) {
+        showToast('Error saving food to local storage', 'error');
+      }
+    }
+
+    function getLogsForDate(dateStr) {
+      try {
+        const allLogs = JSON.parse(localStorage.getItem('aahar_logs_v2')) || {};
+        return allLogs[dateStr] || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveLogsForDate(dateStr, logs) {
+      try {
+        const allLogs = JSON.parse(localStorage.getItem('aahar_logs_v2')) || {};
+        allLogs[dateStr] = logs;
+        localStorage.setItem('aahar_logs_v2', JSON.stringify(allLogs));
+      } catch (e) {
+        console.error('Error writing logs', e);
+      }
+    }
+
+    function updateItemsBadge() {
+      document.getElementById('dbItemsCountBadge').innerText = `${currentFoodDatabase.length} Indian foods`;
+    }
+
+    /* =========================================================
+     * 3. DATE NAVIGATION & HEADER FORMATTING
+     * ========================================================= */
+    function setupDateSelector() {
+      const dateInput = document.getElementById('currentDateInput');
+      dateInput.value = currentSelectedDate;
+
+      dateInput.addEventListener('change', (e) => {
+        currentSelectedDate = e.target.value;
+        updateDateButtons();
+        renderTodayLog();
+        renderWaterTracker();
+      });
+
+      document.getElementById('prevDateBtn').addEventListener('click', () => changeDateOffset(-1));
+      document.getElementById('nextDateBtn').addEventListener('click', () => changeDateOffset(1));
+
+      document.getElementById('quickTodayBtn').addEventListener('click', () => {
+        currentSelectedDate = getTodayDateString();
+        dateInput.value = currentSelectedDate;
+        updateDateButtons();
+        renderTodayLog();
+        renderWaterTracker();
+      });
+
+      document.getElementById('quickYesterdayBtn').addEventListener('click', () => {
+        const parts = getTodayDateString().split('-');
+        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        d.setDate(d.getDate() - 1);
+        currentSelectedDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        dateInput.value = currentSelectedDate;
+        updateDateButtons();
+        renderTodayLog();
+        renderWaterTracker();
+      });
+
+      updateDateButtons();
+    }
+
+    function changeDateOffset(offset) {
+      const parts = currentSelectedDate.split('-');
+      const d = new Date(parts[0], parts[1] - 1, parts[2]);
+      d.setDate(d.getDate() + offset);
+      currentSelectedDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+      document.getElementById('currentDateInput').value = currentSelectedDate;
+      updateDateButtons();
+      renderTodayLog();
+      renderWaterTracker();
+    }
+
+    function updateDateButtons() {
+      const today = getTodayDateString();
+      const parts = today.split('-');
+      const yestDate = new Date(parts[0], parts[1] - 1, parts[2]);
+      yestDate.setDate(yestDate.getDate() - 1);
+      const yesterday = yestDate.toISOString().split('T')[0];
+
+      const todayBtn = document.getElementById('quickTodayBtn');
+      const yestBtn = document.getElementById('quickYesterdayBtn');
+      const headerTitle = document.getElementById('formattedDateHeader');
+
+      if (currentSelectedDate === today) {
+        todayBtn.className = "px-2.5 py-1 rounded-lg bg-white text-leaf-700 shadow-2xs font-bold transition";
+        yestBtn.className = "px-2.5 py-1 rounded-lg text-stone-600 hover:text-stone-900 hover:bg-white transition";
+        headerTitle.innerText = "Today's Nutrition";
+      } else if (currentSelectedDate === yesterday) {
+        yestBtn.className = "px-2.5 py-1 rounded-lg bg-white text-leaf-700 shadow-2xs font-bold transition";
+        todayBtn.className = "px-2.5 py-1 rounded-lg text-stone-600 hover:text-stone-900 hover:bg-white transition";
+        headerTitle.innerText = "Yesterday's Log";
+      } else {
+        todayBtn.className = "px-2.5 py-1 rounded-lg text-stone-600 hover:text-stone-900 hover:bg-white transition";
+        yestBtn.className = "px-2.5 py-1 rounded-lg text-stone-600 hover:text-stone-900 hover:bg-white transition";
+        const dateObj = new Date(currentSelectedDate);
+        headerTitle.innerText = dateObj.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', weekday: 'short' });
+      }
+    }
+
+    function updateGoalsDisplay() {
+      document.getElementById('targetCaloriesDisplay').innerText = dailyGoals.calories;
+      document.getElementById('proteinTarget').innerText = dailyGoals.protein;
+      document.getElementById('carbsTarget').innerText = dailyGoals.carbs;
+      document.getElementById('fatTarget').innerText = dailyGoals.fat;
+      document.getElementById('fiberTarget').innerText = dailyGoals.fiber;
+
+      document.getElementById('goalCaloriesInput').value = dailyGoals.calories;
+      document.getElementById('goalProteinInput').value = dailyGoals.protein;
+      document.getElementById('goalCarbsInput').value = dailyGoals.carbs;
+      document.getElementById('goalFatInput').value = dailyGoals.fat;
+      document.getElementById('goalFiberInput').value = dailyGoals.fiber;
+
+      const waterTarget = parseInt(dailyGoals.water, 10) || 3000;
+      document.getElementById('goalWaterInput').value = waterTarget;
+      updateGoalGlassesLabel(waterTarget);
+
+      if (document.getElementById('targetWaterDisplay')) {
+        document.getElementById('targetWaterDisplay').innerText = waterTarget;
+      }
+      if (document.getElementById('cardWaterTargetDisplay')) {
+        document.getElementById('cardWaterTargetDisplay').innerText = waterTarget;
+      }
+      if (document.getElementById('quickTargetWaterInput')) {
+        document.getElementById('quickTargetWaterInput').value = waterTarget;
+        updateQuickModalCalc(waterTarget);
+      }
+    }
+
+    /* Helper functions for quick goal preset inputs */
+    function setWaterGoalInput(val) {
+      document.getElementById('goalWaterInput').value = val;
+      updateGoalGlassesLabel(val);
+    }
+
+    function updateGoalGlassesLabel(val) {
+      const gls = Math.round(val / 250);
+      const el = document.getElementById('goalTargetGlassesText');
+      if (el) el.innerText = `~${gls} glasses`;
+    }
+
+    function setQuickWaterModalVal(val) {
+      const input = document.getElementById('quickTargetWaterInput');
+      if (input) {
+        input.value = val;
+        updateQuickModalCalc(val);
+      }
+    }
+
+    function updateQuickModalCalc(val) {
+      const el = document.getElementById('quickModalGlassesCalc');
+      if (el) {
+        const gls = Math.round((parseInt(val, 10) || 0) / 250);
+        el.innerText = `~${gls} glasses of 250ml`;
+      }
+    }
+
+    /* =========================================================
+     * 4.1 WATER / HYDRATION TRACKING MODULE
+     * ========================================================= */
+    function getWaterForDate(dateStr) {
+      try {
+        const allWater = JSON.parse(localStorage.getItem('aahar_water_v2')) || {};
+        return allWater[dateStr] || 0;
+      } catch (e) {
+        return 0;
+      }
+    }
+
+    function saveWaterForDate(dateStr, ml) {
+      try {
+        const allWater = JSON.parse(localStorage.getItem('aahar_water_v2')) || {};
+        allWater[dateStr] = Math.max(0, ml);
+        localStorage.setItem('aahar_water_v2', JSON.stringify(allWater));
+      } catch (e) {
+        console.error('Error saving water intake', e);
+      }
+    }
+
+    function logWaterIntake(amountMl) {
+      const current = getWaterForDate(currentSelectedDate);
+      const updated = Math.max(0, current + amountMl);
+      saveWaterForDate(currentSelectedDate, updated);
+      renderWaterTracker();
+      if (amountMl > 0) {
+        showToast(`+${amountMl} ml water logged 💧`, 'info');
+      } else {
+        showToast(`${amountMl} ml adjusted`, 'info');
+      }
+    }
+
+    function renderWaterTracker() {
+      const current = getWaterForDate(currentSelectedDate);
+      const target = parseInt(dailyGoals.water, 10) || 3000;
+      const percent = Math.round((current / target) * 100);
+
+      document.getElementById('currentWaterDisplay').innerText = current;
+      document.getElementById('targetWaterDisplay').innerText = target;
+      if (document.getElementById('cardWaterTargetDisplay')) {
+        document.getElementById('cardWaterTargetDisplay').innerText = target;
+      }
+
+      const fillPercent = Math.min(percent, 100);
+      document.getElementById('waterLevelFill').style.height = `${fillPercent}%`;
+      document.getElementById('waterProgressBar').style.width = `${fillPercent}%`;
+
+      const remaining = target - current;
+      const remElem = document.getElementById('waterRemainingText');
+      const badgeText = document.getElementById('waterStatusText');
+      const badge = document.getElementById('waterStatusBadge');
+
+      if (remaining > 0) {
+        const glassesLeft = Math.ceil(remaining / 250);
+        remElem.innerText = `${remaining} ml left (~${glassesLeft} ${glassesLeft === 1 ? 'glass' : 'glasses'})`;
+        badgeText.innerText = `${percent}% Completed`;
+        badge.className = "text-xs px-3 py-1 rounded-full font-bold bg-cyan-50 text-cyan-800 border border-cyan-200 flex items-center gap-1.5";
+      } else {
+        const over = Math.abs(remaining);
+        remElem.innerText = over === 0 ? "Goal achieved! 🎯" : `+${over} ml over goal! 🌟`;
+        badgeText.innerText = "Goal Reached! 🏆";
+        badge.className = "text-xs px-3 py-1 rounded-full font-bold bg-leaf-50 text-leaf-800 border border-leaf-200 flex items-center gap-1.5";
+      }
+
+      // Dynamic Glasses Matrix Calculation (Scales dynamically based on custom water target)
+      const totalGlassesGoal = Math.max(1, Math.round(target / 250));
+      const filledGlasses = Math.floor(current / 250);
+      document.getElementById('waterGlassesCount').innerText = `${filledGlasses} / ${totalGlassesGoal} glasses`;
+
+      const gridContainer = document.getElementById('glassIconsGrid');
+      gridContainer.innerHTML = '';
+
+      for (let i = 1; i <= totalGlassesGoal; i++) {
+        const isFilled = i <= filledGlasses;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.title = isFilled ? `Glass ${i}: 250ml logged (Click to toggle)` : `Glass ${i}: Empty (Click to log)`;
+        btn.className = `p-2 rounded-xl flex flex-col items-center justify-center transition transform active:scale-90 border ${
+          isFilled 
+            ? 'bg-gradient-to-t from-cyan-500 to-blue-500 text-white border-blue-600 shadow-sm shadow-cyan-500/20' 
+            : 'bg-stone-50 hover:bg-stone-100 text-stone-400 border-stone-200 hover:border-cyan-300'
+        }`;
+        
+        btn.innerHTML = `
+          <svg class="w-5 h-5 ${isFilled ? 'text-white' : 'text-stone-300'}" viewBox="0 0 24 24" fill="${isFilled ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.8">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
+          </svg>
+          <span class="text-[9px] font-extrabold mt-0.5 ${isFilled ? 'text-white' : 'text-stone-400'}">${i}</span>
+        `;
+
+        btn.addEventListener('click', () => {
+          if (isFilled && i === filledGlasses) {
+            logWaterIntake(-250);
+          } else {
+            const targetMl = i * 250;
+            saveWaterForDate(currentSelectedDate, targetMl);
+            renderWaterTracker();
+            showToast(`Water updated to ${targetMl} ml (${i} glasses) 💧`, 'info');
+          }
+        });
+
+        gridContainer.appendChild(btn);
+      }
+    }
+
+    function setupWaterEventListeners() {
+      // Undo button (-250 ml)
+      const undoBtn = document.getElementById('undoWaterBtn');
+      if (undoBtn) {
+        undoBtn.addEventListener('click', () => {
+          const current = getWaterForDate(currentSelectedDate);
+          if (current > 0) {
+            logWaterIntake(-250);
+          } else {
+            showToast('No water logged for today yet', 'info');
+          }
+        });
+      }
+
+      // Custom ml logger
+      const addCustomBtn = document.getElementById('addCustomWaterBtn');
+      const customInput = document.getElementById('customWaterInput');
+      if (addCustomBtn && customInput) {
+        addCustomBtn.addEventListener('click', () => {
+          const val = parseInt(customInput.value, 10);
+          if (val && val > 0) {
+            logWaterIntake(val);
+            customInput.value = '';
+          } else {
+            showToast('Please enter a valid amount in ml', 'error');
+            customInput.focus();
+          }
+        });
+        customInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            addCustomBtn.click();
+          }
+        });
+      }
+
+      // Quick Water Target Modal Handlers
+      const waterModal = document.getElementById('waterTargetModal');
+      const openWaterModalBtn = document.getElementById('openWaterTargetModalBtn');
+      const closeWaterModalBtn = document.getElementById('closeWaterTargetModalBtn');
+      const quickTargetForm = document.getElementById('quickWaterTargetForm');
+      const quickTargetInput = document.getElementById('quickTargetWaterInput');
+
+      if (openWaterModalBtn) {
+        openWaterModalBtn.addEventListener('click', () => {
+          const currentTarget = parseInt(dailyGoals.water, 10) || 3000;
+          quickTargetInput.value = currentTarget;
+          updateQuickModalCalc(currentTarget);
+          waterModal.classList.remove('hidden');
+          document.body.classList.add('modal-open');
+        });
+      }
+
+      if (closeWaterModalBtn) {
+        closeWaterModalBtn.addEventListener('click', () => {
+          waterModal.classList.add('hidden');
+          document.body.classList.remove('modal-open');
+        });
+      }
+
+      if (quickTargetInput) {
+        quickTargetInput.addEventListener('input', (e) => {
+          updateQuickModalCalc(e.target.value);
+        });
+      }
+
+      if (quickTargetForm) {
+        quickTargetForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const newTarget = parseInt(quickTargetInput.value, 10);
+          if (newTarget && newTarget >= 500 && newTarget <= 10000) {
+            dailyGoals.water = newTarget;
+            saveGoals();
+            renderWaterTracker();
+            waterModal.classList.add('hidden');
+            document.body.classList.remove('modal-open');
+            showToast(`Daily water target set to ${newTarget} ml! 💧`, 'success');
+          } else {
+            showToast('Please enter a target between 500 and 10,000 ml', 'error');
+          }
+        });
+      }
+
+      // Sync goalWaterInput in main goals modal when typing
+      const goalWaterInput = document.getElementById('goalWaterInput');
+      if (goalWaterInput) {
+        goalWaterInput.addEventListener('input', (e) => {
+          updateGoalGlassesLabel(e.target.value);
+        });
+      }
+    }
+
+    /* =========================================================
+     * 4. NUTRIENT CALCULATIONS & DASHBOARD STATS
+     * ========================================================= */
+    function calculateNutrientValues(food, grams) {
+      const factor = grams / 100;
+      return {
+        calories: Math.round(food.cal * factor),
+        protein: Math.round(food.p * factor * 10) / 10,
+        carbs: Math.round(food.c * factor * 10) / 10,
+        fat: Math.round(food.f * factor * 10) / 10,
+        fiber: Math.round((food.fib || 0) * factor * 10) / 10
+      };
+    }
+
+    function renderProgressStats() {
+      const logs = getLogsForDate(currentSelectedDate);
+      let totalCal = 0;
+      let totalP = 0;
+      let totalC = 0;
+      let totalF = 0;
+      let totalFib = 0;
+
+      logs.forEach(item => {
+        totalCal += item.calories;
+        totalP += item.protein;
+        totalC += item.carbs;
+        totalF += item.fat;
+        totalFib += item.fiber;
+      });
+
+      totalP = Math.round(totalP * 10) / 10;
+      totalC = Math.round(totalC * 10) / 10;
+      totalF = Math.round(totalF * 10) / 10;
+      totalFib = Math.round(totalFib * 10) / 10;
+
+      // Calories
+      document.getElementById('totalCaloriesDisplay').innerText = totalCal;
+      const remCal = dailyGoals.calories - totalCal;
+      const remElem = document.getElementById('remainingCaloriesDisplay');
+      const remLabel = document.getElementById('remainingCaloriesLabel');
+      const badge = document.getElementById('calorieStatusBadge');
+
+      if (remCal >= 0) {
+        remElem.innerText = remCal;
+        remElem.className = "text-2xl sm:text-3xl font-extrabold text-stone-900";
+        remLabel.innerText = "kcal remaining";
+        badge.innerText = "Within Target";
+        badge.className = "text-xs px-3 py-1 rounded-full font-bold bg-leaf-50 text-leaf-700 border border-leaf-200";
+      } else {
+        remElem.innerText = `+${Math.abs(remCal)}`;
+        remElem.className = "text-2xl sm:text-3xl font-extrabold text-rose-600";
+        remLabel.innerText = "kcal over budget";
+        badge.innerText = "Over Target";
+        badge.className = "text-xs px-3 py-1 rounded-full font-bold bg-rose-50 text-rose-700 border border-rose-200";
+      }
+
+      const calPercent = Math.min(Math.round((totalCal / dailyGoals.calories) * 100), 100);
+      document.getElementById('caloriePercentDisplay').innerText = `${Math.round((totalCal / dailyGoals.calories) * 100)}%`;
+      const calBar = document.getElementById('calorieProgressBar');
+      calBar.style.width = `${calPercent}%`;
+      if (totalCal > dailyGoals.calories) {
+        calBar.className = "bg-rose-500 h-full rounded-full smooth-bar";
+      } else {
+        calBar.className = "bg-gradient-to-r from-leaf-500 to-emerald-600 h-full rounded-full smooth-bar";
+      }
+
+      // Macros
+      document.getElementById('proteinConsumed').innerText = totalP;
+      const pPercent = Math.round((totalP / dailyGoals.protein) * 100);
+      document.getElementById('proteinPercent').innerText = `${pPercent}%`;
+      document.getElementById('proteinBar').style.width = `${Math.min(pPercent, 100)}%`;
+
+      document.getElementById('carbsConsumed').innerText = totalC;
+      const cPercent = Math.round((totalC / dailyGoals.carbs) * 100);
+      document.getElementById('carbsPercent').innerText = `${cPercent}%`;
+      document.getElementById('carbsBar').style.width = `${Math.min(cPercent, 100)}%`;
+
+      document.getElementById('fatConsumed').innerText = totalF;
+      const fPercent = Math.round((totalF / dailyGoals.fat) * 100);
+      document.getElementById('fatPercent').innerText = `${fPercent}%`;
+      document.getElementById('fatBar').style.width = `${Math.min(fPercent, 100)}%`;
+
+      document.getElementById('fiberConsumed').innerText = totalFib;
+      const fibPercent = Math.round((totalFib / dailyGoals.fiber) * 100);
+      document.getElementById('fiberPercent').innerText = `${fibPercent}%`;
+      document.getElementById('fiberBar').style.width = `${Math.min(fibPercent, 100)}%`;
+    }
+
+    function renderTodayLog() {
+      const logs = getLogsForDate(currentSelectedDate);
+      document.getElementById('totalEntriesCount').innerText = `${logs.length} ${logs.length === 1 ? 'dish' : 'dishes'}`;
+
+      const categories = ['Breakfast', 'Lunch', 'Evening Snacks', 'Dinner'];
+      const containers = {
+        Breakfast: document.getElementById('breakfastList'),
+        Lunch: document.getElementById('lunchList'),
+        'Evening Snacks': document.getElementById('snacksList'),
+        Dinner: document.getElementById('dinnerList')
+      };
+      const subtotals = {
+        Breakfast: document.getElementById('breakfastSubtotal'),
+        Lunch: document.getElementById('lunchSubtotal'),
+        'Evening Snacks': document.getElementById('snacksSubtotal'),
+        Dinner: document.getElementById('dinnerSubtotal')
+      };
+
+      categories.forEach(cat => {
+        containers[cat].innerHTML = '';
+      });
+
+      const catCalories = { Breakfast: 0, Lunch: 0, 'Evening Snacks': 0, Dinner: 0 };
+      const catCounts = { Breakfast: 0, Lunch: 0, 'Evening Snacks': 0, Dinner: 0 };
+
+      logs.forEach(item => {
+        const cat = item.meal || 'Lunch';
+        if (catCalories[cat] !== undefined) {
+          catCalories[cat] += item.calories;
+          catCounts[cat]++;
+        }
+
+        const row = document.createElement('div');
+        row.className = "p-3.5 sm:p-4 flex items-center justify-between hover:bg-stone-50/80 transition group";
+        row.innerHTML = `
+          <div class="space-y-1">
+            <div class="flex items-center space-x-2">
+              <span class="font-extrabold text-stone-900 text-sm sm:text-base">${escapeHtml(item.foodName)}</span>
+              <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-stone-100 text-stone-700 border border-stone-200">${item.grams}g</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-x-2 text-[11px] text-stone-500 font-semibold">
+              <span class="text-rose-700 font-bold">${item.protein}g P</span> • 
+              <span class="text-amber-700 font-bold">${item.carbs}g C</span> • 
+              <span class="text-indigo-700 font-bold">${item.fat}g F</span> • 
+              <span class="text-leaf-800 font-bold">${item.fiber}g Fiber</span>
+            </div>
+          </div>
+          <div class="flex items-center space-x-2 sm:space-x-3">
+            <div class="text-right">
+              <span class="text-base font-extrabold text-stone-900">${item.calories}</span>
+              <span class="text-[11px] text-stone-400 block sm:inline font-semibold">kcal</span>
+            </div>
+            <button 
+              type="button" 
+              onclick="openEditLogModal('${item.id}')"
+              title="Edit quantity" 
+              class="p-2 rounded-xl text-stone-400 hover:text-leaf-700 hover:bg-leaf-50 transition"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+            </button>
+            <button 
+              type="button" 
+              onclick="deleteLogItemDirect('${item.id}')"
+              title="Remove item" 
+              class="p-2 rounded-xl text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </button>
+          </div>
+        `;
+        containers[cat].appendChild(row);
+      });
+
+      categories.forEach(cat => {
+        subtotals[cat].innerText = `${catCalories[cat]} kcal`;
+        if (catCounts[cat] === 0) {
+          containers[cat].innerHTML = `<p class="p-4 text-xs text-stone-400 italic">No food logged for ${cat} yet.</p>`;
+        }
+      });
+
+      renderProgressStats();
+    }
+
+    /* =========================================================
+     * 5. AUTOCOMPLETE, SERVING SIZES & LIVE PREVIEW
+     * ========================================================= */
+    const searchInput = document.getElementById('foodSearchInput');
+    const suggestionsBox = document.getElementById('foodSuggestions');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    const weightInput = document.getElementById('foodWeightInput');
+    const livePreview = document.getElementById('livePreviewContainer');
+    const servingUnitsContainer = document.getElementById('servingUnitsContainer');
+    const servingPills = document.getElementById('servingPills');
+    const servingFoodName = document.getElementById('servingSelectedFoodName');
+
+    function setupCategoryPills() {
+      const pills = document.querySelectorAll('.category-pill');
+      pills.forEach(btn => {
+        btn.addEventListener('click', () => {
+          activeCategoryFilter = btn.getAttribute('data-category');
+          pills.forEach(p => {
+            p.className = "category-pill whitespace-nowrap px-3 py-1.5 rounded-xl font-semibold bg-stone-100 text-stone-600 hover:bg-stone-200 transition";
+          });
+          btn.className = "category-pill whitespace-nowrap px-3 py-1.5 rounded-xl font-bold bg-stone-900 text-white transition shadow-2xs";
+
+          filterSuggestions(searchInput.value);
+        });
+      });
+    }
+
+    function filterSuggestions(query) {
+      const q = query.trim().toLowerCase();
+      let matches = currentFoodDatabase;
+
+      if (activeCategoryFilter !== 'ALL') {
+        matches = matches.filter(item => item.category === activeCategoryFilter);
+      }
+
+      if (q) {
+        matches = matches.filter(f => 
+          f.name.toLowerCase().includes(q) || 
+          f.category.toLowerCase().includes(q)
+        );
+      }
+
+      // Limit results
+      const results = matches.slice(0, 8);
+
+      if (results.length === 0) {
+        suggestionsBox.innerHTML = `
+          <div class="p-4 text-xs text-stone-500 text-center">
+            No Indian dish found matching "<strong>${escapeHtml(query)}</strong>".
+            <button type="button" onclick="document.getElementById('openNewFoodModalBtn').click()" class="text-leaf-700 font-bold underline block mt-2">
+              + Add custom dish to database
+            </button>
+          </div>
+        `;
+        suggestionsBox.classList.remove('hidden');
+        return;
+      }
+
+      suggestionsBox.innerHTML = results.map(food => {
+        const catBadge = getCategoryLabel(food.category);
+        return `
+          <div 
+            class="p-3 hover:bg-leaf-50/80 cursor-pointer transition flex items-center justify-between"
+            onclick="selectFoodFromSuggestion('${food.id}')"
+          >
+            <div>
+              <div class="text-xs sm:text-sm font-extrabold text-stone-900">${escapeHtml(food.name)}</div>
+              <div class="text-[10px] text-stone-500 font-semibold mt-0.5">${catBadge}</div>
+            </div>
+            <div class="text-right text-xs">
+              <span class="font-extrabold text-stone-800">${food.cal}</span> <span class="text-[10px] text-stone-400">kcal/100g</span>
+              <div class="text-[10px] text-stone-500 font-semibold">P:${food.p}g • C:${food.c}g • F:${food.f}g</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      suggestionsBox.classList.remove('hidden');
+    }
+
+    function getCategoryLabel(catKey) {
+      const map = {
+        tiffins_staples: '🥞 Tiffins & Grains',
+        curries_dals: '🍲 Curries & Dals',
+        sprouts_legumes: '🌱 Sprouts & Protein',
+        snacks: '🥟 Homemade Snacks',
+        fruits_veg: '🥭 Fruits & Veg',
+        dairy_chutneys: '🥥 Dairy & Chutneys'
+      };
+      return map[catKey] || 'Custom Dish';
+    }
+
+    function selectFoodFromSuggestion(foodId) {
+      const food = currentFoodDatabase.find(f => f.id === foodId);
+      if (!food) return;
+
+      currentSelectedFood = food;
+      searchInput.value = food.name;
+      clearSearchBtn.classList.remove('hidden');
+      suggestionsBox.classList.add('hidden');
+
+      // Populate Servings Pills
+      renderServingShortcuts(food);
+
+      // Default weight: if first serving exists, use it, else 100g
+      if (food.servings && food.servings.length > 0) {
+        weightInput.value = food.servings[0].g;
+      } else {
+        weightInput.value = 100;
+      }
+
+      updateLiveCalculation();
+      weightInput.focus();
+    }
+
+    function renderServingShortcuts(food) {
+      servingFoodName.innerText = food.name;
+      servingPills.innerHTML = '';
+
+      if (food.servings && food.servings.length > 0) {
+        food.servings.forEach(srv => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = "px-3 py-1 text-xs bg-white hover:bg-leaf-100 hover:text-leaf-800 text-stone-700 rounded-xl font-bold border border-stone-200 transition shadow-2xs";
+          btn.innerText = srv.name;
+          btn.addEventListener('click', () => {
+            weightInput.value = srv.g;
+            updateLiveCalculation();
+          });
+          servingPills.appendChild(btn);
+        });
+      }
+
+      // Also append common quick gram pills
+      const standardGrams = [50, 100, 150, 200];
+      standardGrams.forEach(g => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = "px-2 py-1 text-xs bg-stone-100 hover:bg-stone-200 text-stone-600 rounded-xl font-semibold transition";
+        btn.innerText = `${g}g`;
+        btn.addEventListener('click', () => {
+          weightInput.value = g;
+          updateLiveCalculation();
+        });
+        servingPills.appendChild(btn);
+      });
+
+      servingUnitsContainer.classList.remove('hidden');
+    }
+
+    function updateLiveCalculation() {
+      if (!currentSelectedFood) {
+        livePreview.classList.add('hidden');
+        return;
+      }
+
+      const grams = parseFloat(weightInput.value) || 0;
+      if (grams <= 0) {
+        livePreview.classList.add('hidden');
+        return;
+      }
+
+      const computed = calculateNutrientValues(currentSelectedFood, grams);
+      document.getElementById('previewFoodName').innerText = currentSelectedFood.name;
+      document.getElementById('previewWeightTag').innerText = `${grams}g`;
+      document.getElementById('previewKcal').innerText = computed.calories;
+      document.getElementById('previewP').innerText = computed.protein;
+      document.getElementById('previewC').innerText = computed.carbs;
+      document.getElementById('previewF').innerText = computed.fat;
+      document.getElementById('previewFib').innerText = computed.fiber;
+
+      livePreview.classList.remove('hidden');
+    }
+
+    /* =========================================================
+     * 6. FOOD DATABASE TABLE BROWSER
+     * ========================================================= */
+    function renderDatabaseTable() {
+      const tableBody = document.getElementById('dbTableBody');
+      const filterText = document.getElementById('dbFilterInput').value.toLowerCase();
+      const categoryFilter = document.getElementById('dbCategoryFilter').value;
+
+      const filtered = currentFoodDatabase.filter(item => {
+        const matchesCategory = (categoryFilter === 'ALL') || 
+                                (categoryFilter === 'Custom' && item.id.startsWith('custom_')) ||
+                                (item.category === categoryFilter);
+        const matchesSearch = item.name.toLowerCase().includes(filterText);
+        return matchesCategory && matchesSearch;
+      });
+
+      if (filtered.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-stone-400 italic">No food dishes matched your search.</td></tr>`;
+        return;
+      }
+
+      tableBody.innerHTML = filtered.map(item => `
+        <tr class="hover:bg-stone-50/90 transition border-b border-stone-100">
+          <td class="py-2.5 px-3.5 font-bold text-stone-900">
+            ${escapeHtml(item.name)}
+            ${item.id.startsWith('custom_') ? '<span class="ml-1.5 text-[9px] bg-spice-100 text-spice-800 px-1.5 py-0.5 rounded font-extrabold uppercase">Custom</span>' : ''}
+          </td>
+          <td class="py-2.5 px-3 text-stone-500 font-medium">${getCategoryLabel(item.category)}</td>
+          <td class="py-2.5 px-3 text-right font-black text-stone-900">${item.cal}</td>
+          <td class="py-2.5 px-3 text-right text-rose-700 font-bold">${item.p}g</td>
+          <td class="py-2.5 px-3 text-right text-amber-700 font-bold">${item.c}g</td>
+          <td class="py-2.5 px-3 text-right text-indigo-700 font-bold">${item.f}g</td>
+          <td class="py-2.5 px-3 text-right text-leaf-800 font-bold">${item.fib || 0}g</td>
+          <td class="py-2.5 px-3 text-center">
+            <button 
+              type="button"
+              onclick="quickSelectFromTable('${item.id}')"
+              class="px-3 py-1 bg-leaf-50 hover:bg-leaf-100 text-leaf-800 font-bold rounded-xl text-xs transition shadow-2xs"
+            >
+              Select
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function quickSelectFromTable(foodId) {
+      selectFoodFromSuggestion(foodId);
+      window.scrollTo({ top: 120, behavior: 'smooth' });
+    }
+
+    /* =========================================================
+     * 7. LOGGING, EDITING & DELETING ENTRIES
+     * ========================================================= */
+    function handleLogFoodSubmit(e) {
+      e.preventDefault();
+
+      if (!currentSelectedFood) {
+        // Fallback: check exact query match
+        const query = searchInput.value.trim().toLowerCase();
+        const match = currentFoodDatabase.find(f => f.name.toLowerCase() === query);
+        if (match) {
+          currentSelectedFood = match;
+        } else {
+          showToast('Please pick a dish from the Indian food suggestions or database', 'error');
+          searchInput.focus();
+          return;
+        }
+      }
+
+      const grams = parseFloat(weightInput.value);
+      if (!grams || grams <= 0) {
+        showToast('Please specify a valid weight in grams or choose a serving preset', 'error');
+        weightInput.focus();
+        return;
+      }
+
+      const selectedMealRadio = document.querySelector('input[name="mealType"]:checked');
+      const meal = selectedMealRadio ? selectedMealRadio.value : 'Breakfast';
+
+      const computed = calculateNutrientValues(currentSelectedFood, grams);
+
+      const newLogItem = {
+        id: 'entry_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
+        meal: meal,
+        foodId: currentSelectedFood.id,
+        foodName: currentSelectedFood.name,
+        grams: grams,
+        calories: computed.calories,
+        protein: computed.protein,
+        carbs: computed.carbs,
+        fat: computed.fat,
+        fiber: computed.fiber
+      };
+
+      const existingLogs = getLogsForDate(currentSelectedDate);
+      existingLogs.unshift(newLogItem);
+      saveLogsForDate(currentSelectedDate, existingLogs);
+
+      renderTodayLog();
+      showToast(`Logged ${grams}g ${currentSelectedFood.name} to ${meal}`, 'success');
+
+      // Clear search and selections
+      searchInput.value = '';
+      currentSelectedFood = null;
+      livePreview.classList.add('hidden');
+      clearSearchBtn.classList.add('hidden');
+      servingUnitsContainer.classList.add('hidden');
+    }
+
+    function openEditLogModal(entryId) {
+      const logs = getLogsForDate(currentSelectedDate);
+      const item = logs.find(i => i.id === entryId);
+      if (!item) return;
+
+      editingLogItem = item;
+      document.getElementById('editEntryName').innerText = `${item.foodName} (${item.meal})`;
+      document.getElementById('editEntryWeightInput').value = item.grams;
+
+      document.getElementById('editLogModal').classList.remove('hidden');
+      document.body.classList.add('modal-open');
+    }
+
+    function closeEditLogModal() {
+      document.getElementById('editLogModal').classList.add('hidden');
+      document.body.classList.remove('modal-open');
+      editingLogItem = null;
+    }
+
+    function saveEditedLogEntry() {
+      if (!editingLogItem) return;
+
+      const newWeight = parseFloat(document.getElementById('editEntryWeightInput').value);
+      if (!newWeight || newWeight <= 0) {
+        showToast('Please specify a valid weight', 'error');
+        return;
+      }
+
+      const food = currentFoodDatabase.find(f => f.id === editingLogItem.foodId) || {
+        cal: (editingLogItem.calories / editingLogItem.grams) * 100,
+        p: (editingLogItem.protein / editingLogItem.grams) * 100,
+        c: (editingLogItem.carbs / editingLogItem.grams) * 100,
+        f: (editingLogItem.fat / editingLogItem.grams) * 100,
+        fib: (editingLogItem.fiber / editingLogItem.grams) * 100,
+      };
+
+      const recomputed = calculateNutrientValues(food, newWeight);
+
+      const logs = getLogsForDate(currentSelectedDate);
+      const index = logs.findIndex(i => i.id === editingLogItem.id);
+      if (index !== -1) {
+        logs[index].grams = newWeight;
+        logs[index].calories = recomputed.calories;
+        logs[index].protein = recomputed.protein;
+        logs[index].carbs = recomputed.carbs;
+        logs[index].fat = recomputed.fat;
+        logs[index].fiber = recomputed.fiber;
+
+        saveLogsForDate(currentSelectedDate, logs);
+        renderTodayLog();
+        showToast('Weight updated successfully', 'success');
+      }
+
+      closeEditLogModal();
+    }
+
+    function deleteLogItemDirect(entryId) {
+      const logs = getLogsForDate(currentSelectedDate);
+      const filtered = logs.filter(i => i.id !== entryId);
+      saveLogsForDate(currentSelectedDate, filtered);
+      renderTodayLog();
+      showToast('Item deleted from log', 'info');
+    }
+
+    /* =========================================================
+     * 8. EVENT LISTENERS
+     * ========================================================= */
+    function setupEventListeners() {
+      // Meal selection radio visuals
+      const mealRadios = document.querySelectorAll('.meal-radio');
+      mealRadios.forEach(radio => {
+        radio.addEventListener('change', () => {
+          mealRadios.forEach(r => {
+            const label = r.closest('label');
+            if (r.checked) {
+              label.className = "flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl border border-leaf-600 bg-leaf-50/70 text-leaf-800 cursor-pointer font-bold text-xs sm:text-sm shadow-2xs transition";
+            } else {
+              label.className = "flex items-center justify-center space-x-2 py-2.5 px-3 rounded-xl border border-stone-200 bg-stone-50/50 hover:bg-stone-100 text-stone-700 cursor-pointer font-semibold text-xs sm:text-sm transition";
+            }
+          });
+        });
+      });
+
+      // Search input autocomplete
+      searchInput.addEventListener('input', (e) => {
+        const val = e.target.value;
+        if (val.trim()) {
+          clearSearchBtn.classList.remove('hidden');
+        } else {
+          clearSearchBtn.classList.add('hidden');
+          currentSelectedFood = null;
+          livePreview.classList.add('hidden');
+          servingUnitsContainer.classList.add('hidden');
+        }
+        filterSuggestions(val);
+      });
+
+      // Focus on search input opens suggestions
+      searchInput.addEventListener('focus', () => {
+        filterSuggestions(searchInput.value);
+      });
+
+      // Clear search button
+      clearSearchBtn.addEventListener('click', () => {
+        searchInput.value = '';
+        currentSelectedFood = null;
+        clearSearchBtn.classList.add('hidden');
+        suggestionsBox.classList.add('hidden');
+        livePreview.classList.add('hidden');
+        servingUnitsContainer.classList.add('hidden');
+        searchInput.focus();
+      });
+
+      // Hide suggestions when clicking outside
+      document.addEventListener('click', (e) => {
+        if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) {
+          suggestionsBox.classList.add('hidden');
+        }
+      });
+
+      // Live calculation on grams change
+      weightInput.addEventListener('input', updateLiveCalculation);
+
+      // Submit Log form
+      document.getElementById('addFoodForm').addEventListener('submit', handleLogFoodSubmit);
+
+      // Database library toggle
+      const toggleDbBtn = document.getElementById('toggleDbBrowser');
+      const dbContent = document.getElementById('dbBrowserContent');
+      const dbArrow = document.getElementById('dbToggleArrow');
+
+      toggleDbBtn.addEventListener('click', () => {
+        const isHidden = dbContent.classList.contains('hidden');
+        if (isHidden) {
+          dbContent.classList.remove('hidden');
+          dbArrow.innerText = '▲ Hide Library';
+          renderDatabaseTable();
+        } else {
+          dbContent.classList.add('hidden');
+          dbArrow.innerText = '▼ Expand Library';
+        }
+      });
+
+      document.getElementById('dbFilterInput').addEventListener('input', renderDatabaseTable);
+      document.getElementById('dbCategoryFilter').addEventListener('change', renderDatabaseTable);
+
+      // Goals Modal Handlers
+      const goalsModal = document.getElementById('goalsModal');
+      document.getElementById('openGoalsModalBtn').addEventListener('click', () => {
+        goalsModal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+      });
+      document.getElementById('closeGoalsModalBtn').addEventListener('click', () => {
+        goalsModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+      });
+
+      document.getElementById('goalsForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        dailyGoals = {
+          calories: parseInt(document.getElementById('goalCaloriesInput').value, 10) || 2000,
+          protein: parseInt(document.getElementById('goalProteinInput').value, 10) || 120,
+          carbs: parseInt(document.getElementById('goalCarbsInput').value, 10) || 230,
+          fat: parseInt(document.getElementById('goalFatInput').value, 10) || 55,
+          fiber: parseInt(document.getElementById('goalFiberInput').value, 10) || 30,
+          water: parseInt(document.getElementById('goalWaterInput').value, 10) || 3000
+        };
+        saveGoals();
+        renderWaterTracker();
+        goalsModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+        showToast('Daily nutrition & water goals updated!', 'success');
+      });
+
+      document.getElementById('resetDefaultsGoalBtn').addEventListener('click', () => {
+        dailyGoals = { ...DEFAULT_GOALS };
+        saveGoals();
+        renderWaterTracker();
+        goalsModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+        showToast('Goals reset to standard defaults', 'info');
+      });
+
+      // Custom Dish Creator Handlers
+      const newFoodModal = document.getElementById('newFoodModal');
+      document.getElementById('openNewFoodModalBtn').addEventListener('click', () => {
+        newFoodModal.classList.remove('hidden');
+        document.body.classList.add('modal-open');
+      });
+      document.getElementById('closeNewFoodModalBtn').addEventListener('click', () => {
+        newFoodModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+      });
+
+      document.getElementById('newFoodForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const foodName = document.getElementById('customFoodName').value.trim();
+        const category = document.getElementById('customFoodCategory').value;
+        const cal = parseFloat(document.getElementById('customFoodCalories').value);
+        const p = parseFloat(document.getElementById('customFoodProtein').value);
+        const c = parseFloat(document.getElementById('customFoodCarbs').value);
+        const f = parseFloat(document.getElementById('customFoodFat').value);
+        const fib = parseFloat(document.getElementById('customFoodFiber').value) || 0;
+        const srvLabel = document.getElementById('customServingLabel').value.trim();
+        const srvGrams = parseFloat(document.getElementById('customServingGrams').value);
+
+        if (!foodName || isNaN(cal)) {
+          showToast('Please fill out all mandatory dish parameters', 'error');
+          return;
+        }
+
+        const servings = [];
+        if (srvLabel && srvGrams > 0) {
+          servings.push({ name: `${srvLabel} (~${srvGrams}g)`, g: srvGrams });
+        }
+
+        const newFood = {
+          id: 'custom_' + Date.now(),
+          name: foodName,
+          category: category,
+          cal: Math.round(cal * 10) / 10,
+          p: Math.round(p * 10) / 10,
+          c: Math.round(c * 10) / 10,
+          f: Math.round(f * 10) / 10,
+          fib: Math.round(fib * 10) / 10,
+          servings: servings
+        };
+
+        saveCustomFood(newFood);
+        newFoodModal.classList.add('hidden');
+        document.body.classList.remove('modal-open');
+        document.getElementById('newFoodForm').reset();
+
+        selectFoodFromSuggestion(newFood.id);
+      });
+
+      // Edit Log Quantity Handlers
+      document.getElementById('closeEditLogModalBtn').addEventListener('click', closeEditLogModal);
+      document.getElementById('saveEditEntryBtn').addEventListener('click', saveEditedLogEntry);
+      document.getElementById('deleteEntryBtn').addEventListener('click', () => {
+        if (editingLogItem) {
+          deleteLogItemDirect(editingLogItem.id);
+          closeEditLogModal();
+        }
+      });
+    }
+
+    /* =========================================================
+     * 9. NOTIFICATIONS & SECURITY
+     * ========================================================= */
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+
+      let colors = 'bg-stone-900 text-white';
+      if (type === 'success') colors = 'bg-leaf-700 text-white shadow-leaf-700/30';
+      if (type === 'error') colors = 'bg-rose-600 text-white shadow-rose-600/30';
+
+      toast.className = `${colors} px-4 py-3 rounded-2xl shadow-xl text-xs sm:text-sm font-bold flex items-center space-x-2 transform transition-all duration-300 translate-y-3 opacity-0 pointer-events-auto`;
+      toast.innerHTML = `
+        <span>${escapeHtml(message)}</span>
+      `;
+
+      container.appendChild(toast);
+
+      requestAnimationFrame(() => {
+        toast.classList.remove('translate-y-3', 'opacity-0');
+      });
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 2600);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    // Launch application
+    window.onload = function() {
+      initApp();
+    };
+  </script>
+</body>
+</html>
